@@ -11,6 +11,7 @@ func writeJSONReport(writer io.Writer, result *lint.Result) error {
 	report := JSONReport{
 		Source:       result.Source,
 		Valid:        result.Valid,
+		Ignored:      result.Ignored,
 		ErrorCount:   result.ErrorCount(),
 		WarningCount: result.WarningCount(),
 		Findings:     make([]JSONFinding, 0, len(result.Findings)),

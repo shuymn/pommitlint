@@ -30,6 +30,7 @@ type Finding struct {
 type Result struct {
 	Source   string    `json:"source"`
 	Valid    bool      `json:"valid"`
+	Ignored  bool      `json:"ignored"`
 	Findings []Finding `json:"findings"`
 }
 
