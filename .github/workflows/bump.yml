@@ -15,7 +15,7 @@ jobs:
     if: startsWith(github.head_ref, 'renovate/') && (contains(github.event.pull_request.labels.*.name, 'renovate:major') || contains(github.event.pull_request.labels.*.name, 'renovate:minor'))
     timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Create app token
