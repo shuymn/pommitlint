@@ -138,22 +138,22 @@ func TestCompatDefaultIgnores(t *testing.T) {
 			name:        "semver-with-chore-release",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "chore(release): 2.3.3-beta.1 [skip ci]",
-			wantIgnored: true,
+			wantIgnored: false,
 			wantExit:    0,
 		},
 		{
 			name:        "semver-with-ci-skip-brackets",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "2.3.3-beta.1 [ci skip]",
-			wantIgnored: true,
-			wantExit:    0,
+			wantIgnored: false,
+			wantExit:    1,
 		},
 		{
 			name:        "semver-with-ci-skip-parentheses",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "2.3.3-beta.1 (ci-skip)",
-			wantIgnored: true,
-			wantExit:    0,
+			wantIgnored: false,
+			wantExit:    1,
 		},
 		{
 			name:        "semver-with-footers",
@@ -278,42 +278,44 @@ func TestCompatDefaultIgnores(t *testing.T) {
 			wantExit:    0,
 		},
 
-		// CI skip marker variations
+		// CI skip marker variations: commitlint uses semver.valid() which rejects
+		// trailing markers like [ci skip]. These are NOT ignored.
 		{
 			name:        "ci-skip-brackets-dash",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "2.3.3-beta.1 [skip-ci]",
-			wantIgnored: true,
-			wantExit:    0,
+			wantIgnored: false,
+			wantExit:    1,
 		},
 		{
 			name:        "ci-skip-parens-space",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "2.3.3-beta.1 (skip ci)",
-			wantIgnored: true,
-			wantExit:    0,
+			wantIgnored: false,
+			wantExit:    1,
 		},
 		{
 			name:        "ci-skip-parens-reversed",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "2.3.3-beta.1 (ci skip)",
-			wantIgnored: true,
-			wantExit:    0,
+			wantIgnored: false,
+			wantExit:    1,
 		},
 
-		// chore + semver + CI skip combinations
+		// chore + semver + CI skip: chore prefix is stripped but CI skip marker
+		// remains, making it invalid semver. NOT ignored.
 		{
 			name:        "chore-semver-ci-skip",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "chore: 2.3.3-beta.1 [ci skip]",
-			wantIgnored: true,
+			wantIgnored: false,
 			wantExit:    0,
 		},
 		{
 			name:        "chore-release-semver-ci-skip",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "chore(release): 2.3.3-beta.1 [ci skip]",
-			wantIgnored: true,
+			wantIgnored: false,
 			wantExit:    0,
 		},
 

@@ -337,8 +337,6 @@ var defaultIgnorePatterns = []func(string) bool{
 var (
 	semverPattern            = regexp.MustCompile(`^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
 	semverChorePrefixPattern = regexp.MustCompile(`^chore(\([^)]+\))?:`)
-	semverBracketSkipPattern = regexp.MustCompile(`\[(skip|ci)(-|\s)(ci|skip)\]`)
-	semverParenSkipPattern   = regexp.MustCompile(`\((skip|ci)(-|\s)(ci|skip)\)`)
 )
 
 func shouldIgnore(message string) bool {
@@ -354,8 +352,6 @@ func shouldIgnore(message string) bool {
 func isSemverMessage(message string) bool {
 	firstLine, _, _ := strings.Cut(message, "\n")
 	stripped := semverChorePrefixPattern.ReplaceAllString(firstLine, "")
-	stripped = semverBracketSkipPattern.ReplaceAllString(stripped, "")
-	stripped = semverParenSkipPattern.ReplaceAllString(stripped, "")
 	return semverPattern.MatchString(strings.TrimSpace(stripped))
 }
 
