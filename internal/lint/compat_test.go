@@ -533,6 +533,14 @@ func TestCompatParseScopeAndFooterBehavior(t *testing.T) {
 			wantFooterLines: nil,
 		},
 		{
+			name:            "scope-with-chinese-characters",
+			origin:          "@commitlint/parse/src/index.test.ts",
+			message:         "fix(面试评价): 测试",
+			wantScope:       "面试评价",
+			wantBodyLines:   nil,
+			wantFooterLines: nil,
+		},
+		{
 			name:            "inline-reference-moves-body-content-to-footer",
 			origin:          "@commitlint/parse/src/index.test.ts",
 			message:         "type(some/scope): subject #reference\n\nthings #reference",
@@ -560,6 +568,65 @@ func TestCompatParseScopeAndFooterBehavior(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.wantFooterLines, message.FooterLines); diff != "" {
 				t.Fatalf("%s: FooterLines mismatch (-want +got):\n%s", tt.origin, diff)
+			}
+		})
+	}
+}
+
+func TestCompatSubjectCaseSkipsNonCasedSubjects(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		origin  string
+		message string
+	}{
+		{
+			name:    "empty-subject",
+			origin:  "@commitlint/rules/src/subject-case.test.ts",
+			message: "feat:",
+		},
+		{
+			name:    "numeric-subject",
+			origin:  "@commitlint/rules/src/subject-case.test.ts",
+			message: "feat: 1.0.0",
+		},
+		{
+			name:    "caseless-subject",
+			origin:  "@commitlint/rules/src/subject-case.test.ts",
+			message: "feat: 这是一次提交",
+		},
+		{
+			name:    "non-latin-subject",
+			origin:  "@commitlint/rules/src/subject-case.test.ts",
+			message: "feat: 追加する",
+		},
+	}
+
+	rules := make(map[preset.RuleName]preset.Rule, 1)
+	rules[preset.RuleSubjectCase] = preset.Rule{
+		Level:      2,
+		Applicable: preset.ApplicableNever,
+		Value: rawJSON(t, []string{
+			"sentence-case",
+			"start-case",
+			"pascal-case",
+			"upper-case",
+		}),
+	}
+	schema := compatSchemaForRules(t, rules)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			result, err := lint.Lint(tt.message, "compat", &schema)
+			if err != nil {
+				t.Fatalf("%s: Lint() error = %v", tt.origin, err)
+			}
+
+			if hasRule(result.Findings, preset.RuleSubjectCase) {
+				t.Fatalf("%s: unexpected subject-case finding: %#v", tt.origin, result.Findings)
 			}
 		})
 	}
