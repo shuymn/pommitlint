@@ -12,7 +12,7 @@
   - Why not split vertically further?: parser/rules/runtime の全 Theme がこの artifact contract に依存するため、先に閉じないと後続の public contract が揺れる。
   - Escalate if: upstream resolved config に schema 化不能な値が含まれ、fail-closed 以外で前進できないと判明した場合。
 
-- [ ] Theme: `lint` runtime の public contract を成立させる
+- [x] Theme: `lint` runtime の public contract を成立させる
   - Outcome: 単一バイナリが `config-conventional` 相当の lint を text/json で返せる。
   - Goal: CLI 入力契約、AST、rule engine、report schema、exit code を一気通しで固定する。
   - Must Not Break: `config-conventional` の rule 値改変、UTF-16 長さ判定の互換性低下、warning/error exit code 契約の曖昧化、通常的な commit message 入力で体感待ちが発生する実行時間。
@@ -23,9 +23,9 @@
     - If a body line contains a URL, `body-max-line-length` shall ignore that line, and `footer-max-line-length` shall not inherit that exception.
     - If a subject is non-Latin only, `subject-case` shall not fail unless the subject clearly matches a forbidden case bucket.
     - When linting a typical single commit message, the command shall complete without network access, without spawning external parsers, and with work proportional to input length.
-  - Evidence: `run=task check && go test ./... -run 'TestLint|TestParser|TestReport'; oracle=fixtures and contract tests prove lint output, JSON shape, and exit codes across valid/invalid messages; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay'; notes=system-level fixture replay is the primary closure check for the runtime contract.`
+  - Evidence: `run=task check && go test ./... -run 'TestLint|TestParser|TestReport'; oracle=fixtures and contract tests prove lint output, JSON shape, and exit codes across valid/invalid messages; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay|TestCLIFileReplay'; notes=system-level fixture replay is the primary closure check for the runtime contract.`
   - Gates: `static`, `integration`, `system`
-  - Executable doc: `go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay'` proves text/json output and CLI exit codes for each input mode.
+  - Executable doc: `go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay|TestCLIFileReplay'` proves text/json output and CLI exit codes for each input mode.
   - Why not split vertically further?: parser、rules、report を別 Theme にすると AST と finding schema の責務境界が二重定義になりやすい。
   - Escalate if: commitlint upstream docs と設計書の期待が衝突し、1 つの pass/fail 契約に収束しない場合。
 
