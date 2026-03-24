@@ -30,7 +30,7 @@ tasks:
       This task mutates the workspace by creating/updating {{.BINARY_PATH}}.
     cmds:
       - mkdir -p {{.BIN_DIR}}
-      - go build -o {{.BINARY_PATH}} .
+      - go build -ldflags "-X github.com/shuymn/pommitlint/internal/version.Version=dev" -o {{.BINARY_PATH}} .
       - test -f {{.BINARY_PATH}}
       - test -x {{.BINARY_PATH}}
 

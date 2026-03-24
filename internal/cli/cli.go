@@ -15,6 +15,7 @@ import (
 
 	"github.com/shuymn/pommitlint/internal/lint"
 	"github.com/shuymn/pommitlint/internal/preset"
+	"github.com/shuymn/pommitlint/internal/version"
 )
 
 var ErrLintFailed = errors.New("lint failed")
@@ -87,6 +88,7 @@ func newApp(options *Options) *app {
 func newRootCommand(ctx context.Context, app *app) *cobra.Command {
 	command := &cobra.Command{
 		Use:           "pommitlint",
+		Version:       version.Version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
