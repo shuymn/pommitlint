@@ -20,8 +20,7 @@ on:
       - "**/*.ts"
 
 jobs:
-  compat-check:
-    name: Compat Check
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
