@@ -15,7 +15,7 @@ Provide a Go CLI that enforces `@commitlint/config-conventional` equivalent lint
 
 ## Core Boundaries
 
-- `tools/sync-preset/` is maintainer-only and may depend on Bun plus upstream JS packages to resolve the canonical preset.
+- `tools/sync-preset/` is maintainer-only and runs a four-stage pipeline: (1) resolve the canonical preset via Bun and upstream JS packages, (2) validate that all rule names and parser fields are recognized by the runtime schema (fail-closed), (3) normalize the JS-typed encoding into `preset.Schema`, and (4) write the `preset.json` artifact atomically. The typed wire format between the TS resolver and the Go normalizer (`rawValue` kind-discriminated encoding) is an internal protocol scoped to this directory.
 - `internal/preset/` is the sole runtime boundary for upstream-derived data. It stores a normalized schema and embed/load code only.
 - Runtime CLI reads commit messages from `stdin`, explicit flags, or Git edit files, applies built-in ignore rules, parses the message into a minimal AST, evaluates embedded rules, and reports findings.
 - Runtime does not perform config discovery, `extends` resolution, parser preset lookup, JS/TS config execution, or plugin loading.
@@ -25,7 +25,7 @@ Provide a Go CLI that enforces `@commitlint/config-conventional` equivalent lint
 ## Key Tech Decisions
 
 - Use a normalized `preset.json` artifact instead of embedding raw resolved commitlint config objects.
-- Fail sync on unknown rule names, unsupported parser fields, or other upstream data that cannot be mapped to the runtime schema.
+- Fail sync on unknown rule names, unsupported parser fields, or other upstream data that cannot be mapped to the runtime schema. This validation is enforced by the `tools/sync-preset/` normalization stage.
 - Count header/body/footer lengths using UTF-16 code units to stay close to JS `string.length` behavior.
 - Implement default ignore rules as explicit Go logic instead of importing JS ignore functions.
 - Keep the runtime contract narrow: `lint`, `hook install`, `print-preset`, `version`.
