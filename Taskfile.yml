@@ -167,6 +167,18 @@ tasks:
         silent: true
       - "{{.BIN_DIR}}/golangci-lint fmt {{range .CLI_ARGS_LIST}}{{shellQuote .}} {{end}}"
 
+  lint:commit-msg:
+    desc: Lint a commit message file
+    summary: |
+      Lints the commit message file at the given path using pommitlint.
+      Intended for use in the commit-msg git hook.
+      Usage: task lint:commit-msg -- <path>
+    preconditions:
+      - sh: test -x {{.BINARY_PATH}}
+        msg: "{{.BINARY_PATH}} is not built. Run: task build"
+    cmds:
+      - ./{{.BINARY_PATH}} lint --edit {{range .CLI_ARGS_LIST}}{{shellQuote .}} {{end}}
+
   secrets:staged:
     desc: Scan staged changes for secrets
     summary: |

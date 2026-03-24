@@ -32,7 +32,7 @@ pre-commit:
     build:
       tags: [build]
       glob: "**/*.go"
-      run: task build:check
+      run: task build
 
     gitleaks:
       tags: [security]
@@ -41,6 +41,11 @@ pre-commit:
   skip:
     - merge: true
     - rebase: true
+
+commit-msg:
+  commands:
+    pommitlint:
+      run: task lint:commit-msg -- {1}
 
 pre-push:
   piped: true
