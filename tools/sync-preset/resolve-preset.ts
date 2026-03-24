@@ -35,9 +35,11 @@ function encodeValue(value: unknown): EncodedValue {
       return { kind: "function" };
     case "object": {
       const object = Object.fromEntries(
-        Object.entries(value).sort(([left], [right]) => left.localeCompare(right)).map(([key, entry]) => {
-          return [key, encodeValue(entry)];
-        }),
+        Object.entries(value)
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([key, entry]) => {
+            return [key, encodeValue(entry)];
+          }),
       );
 
       return { kind: "object", object };

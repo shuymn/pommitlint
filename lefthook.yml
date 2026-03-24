@@ -19,10 +19,21 @@ pre-commit:
       run: task fmt:fix -- {staged_files}
       stage_fixed: true
 
+    fmt:ts:
+      tags: [format]
+      glob: "tools/**/*.ts"
+      run: task fmt:fix:ts
+      stage_fixed: true
+
     lint:
       tags: [lint]
       glob: "**/*.go"
       run: task lint
+
+    lint:ts:
+      tags: [lint]
+      glob: "tools/**/*.ts"
+      run: task lint:ts
 
     tidy:
       tags: [deps]

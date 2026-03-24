@@ -21,4 +21,4 @@
 .env
 
 # Bun install output
-/tools/sync-preset/node_modules/
+node_modules/

@@ -138,6 +138,18 @@ tasks:
         silent: true
       - "{{.BIN_DIR}}/golangci-lint run"
 
+  lint:ts:
+    desc: Run oxlint on TypeScript files in tools/
+    summary: |
+      Lints TypeScript files under tools/ using oxlint via bunx.
+      No configuration file required.
+      Read-only task.
+    preconditions:
+      - sh: command -v bun >/dev/null 2>&1
+        msg: "bun is not installed. Please install it first."
+    cmds:
+      - bunx oxlint tools/
+
   fmt:check:
     desc: Check formatting without modifying files
     summary: |
@@ -151,6 +163,18 @@ tasks:
       - cmd: "{{.BIN_DIR}}/golangci-lint version"
         silent: true
       - "{{.BIN_DIR}}/golangci-lint fmt --diff {{range .CLI_ARGS_LIST}}{{shellQuote .}} {{end}}"
+
+  fmt:check:ts:
+    desc: Check TypeScript formatting in tools/ without modifying files
+    summary: |
+      Checks TypeScript formatting under tools/ using oxfmt via bunx.
+      No configuration file required.
+      Read-only task.
+    preconditions:
+      - sh: command -v bun >/dev/null 2>&1
+        msg: "bun is not installed. Please install it first."
+    cmds:
+      - bunx oxfmt --check tools/
 
   fmt:fix:
     aliases: [fmt]
@@ -166,6 +190,18 @@ tasks:
       - cmd: "{{.BIN_DIR}}/golangci-lint version"
         silent: true
       - "{{.BIN_DIR}}/golangci-lint fmt {{range .CLI_ARGS_LIST}}{{shellQuote .}} {{end}}"
+
+  fmt:fix:ts:
+    aliases: [fmt:ts]
+    desc: Format TypeScript files in tools/
+    summary: |
+      Formats TypeScript files under tools/ using oxfmt via bunx.
+      No configuration file required.
+    preconditions:
+      - sh: command -v bun >/dev/null 2>&1
+        msg: "bun is not installed. Please install it first."
+    cmds:
+      - bunx oxfmt tools/
 
   lint:commit-msg:
     desc: Lint a commit message file
@@ -222,6 +258,8 @@ tasks:
         silent: true
     cmds:
       - task: lint
+      - task: lint:ts
+      - task: fmt:check:ts
       - task: build:check
       - task: test
       - task: tidy
