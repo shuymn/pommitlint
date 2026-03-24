@@ -1,4 +1,4 @@
-module github.com/shuymn/go-template
+module github.com/shuymn/pommitlint
 
 go 1.25
 
