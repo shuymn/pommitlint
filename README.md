@@ -1,27 +1,25 @@
 # pommitlint
 
-`pommitlint` is a planned Go CLI that provides `@commitlint/config-conventional` equivalent linting as a single binary. The runtime target is intentionally narrow: no runtime Node.js dependency, no config discovery, no plugin system, and no arbitrary `extends` support.
+`pommitlint` is a Go CLI that provides `@commitlint/config-conventional` equivalent linting as a single binary. The runtime target is intentionally narrow: no runtime Node.js dependency, no config discovery, no plugin system, and no arbitrary `extends` support.
 
 ## Status
 
-The repository is in the design-to-implementation handoff phase. The authoritative planning artifacts are:
+The repository ships the v1 lint runtime and hook installer. The authoritative closure artifacts are:
 
 - [`TODO.md`](TODO.md) for Theme-level execution and closure criteria
 - [`docs/architecture.md`](docs/architecture.md) for the architecture baseline
 - [`docs/adr/005-runtime-preset-boundary.md`](docs/adr/005-runtime-preset-boundary.md) through [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for durable design decisions
 
-## Planned CLI
+## CLI
 
-The v1 public contract is:
+The current public commands are:
 
 ```text
 pommitlint lint
 pommitlint hook install
-pommitlint print-preset
-pommitlint version
 ```
 
-`lint` will support one input source at a time: `stdin`, `--message`, `--file`, or `--edit [PATH]`.
+`lint` supports one input source at a time: `stdin`, `--message`, `--file`, or `--edit [PATH]`.
 
 ## Development
 
@@ -33,9 +31,10 @@ task build
 task test
 task lint
 task check
+task sync-preset
 ```
 
-Current repository tasks are still generic Go project tasks; product-specific tasks and code will be introduced in the implementation Themes described in [`TODO.md`](TODO.md).
+`task check` is the CI-equivalent verification entrypoint. `task sync-preset` regenerates the embedded normalized preset and is expected to be idempotent when upstream inputs do not change.
 
 ## Dependency Posture
 
@@ -50,6 +49,8 @@ See [`docs/adr/006-library-selection.md`](docs/adr/006-library-selection.md) for
 See [`docs/adr/007-git-test-isolation.md`](docs/adr/007-git-test-isolation.md) for Git/GPG test isolation policy.
 See [`docs/adr/008-non-functional-requirements.md`](docs/adr/008-non-functional-requirements.md) for the v1 security and performance baseline.
 See [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for the embedded preset notice policy.
+
+Release artifacts must include [`LICENSE`](LICENSE) and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Scope
 
@@ -67,3 +68,16 @@ v1 explicitly excludes:
 - plugin support
 - prompt/interactive authoring
 - full commitlint CLI compatibility
+
+## Verification
+
+The release-readiness replay path is:
+
+```bash
+task check
+task sync-preset
+git diff --exit-code
+go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'
+```
+
+Focused runtime regression coverage also includes benchmarks in [`internal/lint/lint_bench_test.go`](internal/lint/lint_bench_test.go) and fuzz coverage in [`internal/lint/fuzz_test.go`](internal/lint/fuzz_test.go).

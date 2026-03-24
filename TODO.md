@@ -46,7 +46,7 @@
   - Why not split vertically further?: input sanitization と hook install は user-facing replay 手順を共有しており、分離すると acceptance と evidence が重複する。
   - Escalate if: Git comment/scissors 除去仕様が実 commit message 例で矛盾し、単一の sanitization policy を定義できない場合。
 
-- [ ] Theme: verification / release metadata / docs を閉じる
+- [x] Theme: verification / release metadata / docs を閉じる
   - Outcome: v1 を close できる checks、配布 metadata、利用者向け最低限 docs が揃う。
   - Goal: `task` 導線、golden/fuzz tests、`THIRD_PARTY_NOTICES.md`、README、設計 artifact の整合性、非機能要件の replay を固定する。
   - Must Not Break: `task check` の標準導線、ライセンス notice 欠落、未検証での merge 判定、セキュリティ/性能要件の未証明なままの close、embed 済み preset 由来物に対する attribution 不足。
