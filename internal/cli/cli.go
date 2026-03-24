@@ -224,7 +224,7 @@ func resolveInput(ctx context.Context, stdin io.Reader, workDir, message, filePa
 	case editPath != "":
 		resolvedEditPath := editPath
 		if resolvedEditPath == defaultEditSentinel {
-			resolvedEditPath = filepath.Join(defaultWorkDir(workDir), ".git", "COMMIT_EDITMSG")
+			resolvedEditPath = resolveDefaultEditPath(ctx, workDir)
 		}
 
 		content, err := os.ReadFile(resolvedEditPath)
@@ -386,9 +386,8 @@ func resolveCommentPrefix(ctx context.Context, raw, workDir string) (string, boo
 		return "", false
 	}
 
-	for _, line := range strings.Split(strings.TrimRight(commented, "\n"), "\n") {
-		if strings.HasSuffix(line, sentinel) {
-			prefix := strings.TrimSuffix(line, sentinel)
+	for line := range strings.SplitSeq(strings.TrimRight(commented, "\n"), "\n") {
+		if prefix, ok := strings.CutSuffix(line, sentinel); ok {
 			return strings.TrimSuffix(prefix, " "), true
 		}
 	}
@@ -424,6 +423,29 @@ func resolveEditSanitizeDir(ctx context.Context, editPath, workDir string) strin
 	return strings.TrimSpace(string(output))
 }
 
+func resolveDefaultEditPath(ctx context.Context, workDir string) string {
+	baseDir := defaultWorkDir(workDir)
+	resolved, err := resolveGitPath(ctx, baseDir, "COMMIT_EDITMSG")
+	if err != nil {
+		return filepath.Join(baseDir, ".git", "COMMIT_EDITMSG")
+	}
+	return resolved
+}
+
+func resolveGitPath(ctx context.Context, baseDir, gitPathArg string) (string, error) {
+	command := exec.CommandContext(ctx, "git", "rev-parse", "--git-path", gitPathArg)
+	command.Dir = baseDir
+	output, err := command.Output()
+	if err != nil {
+		return "", err
+	}
+	resolved := strings.TrimSpace(string(output))
+	if filepath.IsAbs(resolved) {
+		return resolved, nil
+	}
+	return filepath.Join(baseDir, resolved), nil
+}
+
 func fallbackSanitizeEditMessage(raw, commentPrefix string) string {
 	lines := strings.Split(raw, "\n")
 	sanitized := make([]string, 0, len(lines))
@@ -449,16 +471,9 @@ func resolveHookPath(ctx context.Context, workDir, hooksDir string) (string, err
 		return filepath.Join(hooksDir, "commit-msg"), nil
 	}
 
-	command := exec.CommandContext(ctx, "git", "rev-parse", "--git-path", "hooks")
-	command.Dir = baseDir
-	output, err := command.Output()
+	hooksPath, err := resolveGitPath(ctx, baseDir, "hooks")
 	if err != nil {
 		return "", fmt.Errorf("resolve git hooks path: %w", err)
-	}
-
-	hooksPath := strings.TrimSpace(string(output))
-	if !filepath.IsAbs(hooksPath) {
-		hooksPath = filepath.Join(baseDir, hooksPath)
 	}
 
 	return filepath.Join(hooksPath, "commit-msg"), nil

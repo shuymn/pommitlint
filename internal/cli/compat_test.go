@@ -161,6 +161,57 @@ func TestCompatDefaultIgnores(t *testing.T) {
 	}
 }
 
+func TestCompatEditDefaultsToGitCommitEditMsgFromRoot(t *testing.T) {
+	t.Parallel()
+
+	repo := newIsolatedGitRepo(t)
+	editPath := filepath.Join(repo.rootDir, ".git", "COMMIT_EDITMSG")
+	content := "feat: add parser\n\nbody\n# comment\n# ------------------------ >8 ------------------------\nshould be cut\n"
+	if err := os.WriteFile(editPath, []byte(content), 0o600); err != nil {
+		t.Fatalf("write edit file: %v", err)
+	}
+
+	got := runEditDefaultCompat(t, repo.rootDir)
+
+	if got.Ignored {
+		t.Fatal("Ignored = true, want false")
+	}
+	if !got.Valid {
+		t.Fatalf("Valid = false, want true, findings = %#v", got.Findings)
+	}
+	if diff := cmp.Diff("edit", got.Source); diff != "" {
+		t.Fatalf("Source mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestCompatEditDefaultsToGitCommitEditMsgFromSubdirectory(t *testing.T) {
+	t.Parallel()
+
+	repo := newIsolatedGitRepo(t)
+	subdir := filepath.Join(repo.rootDir, "subdir")
+	if err := os.MkdirAll(subdir, 0o755); err != nil {
+		t.Fatalf("mkdir subdir: %v", err)
+	}
+
+	editPath := filepath.Join(repo.rootDir, ".git", "COMMIT_EDITMSG")
+	content := "feat: add parser\n\nbody\n# comment\n# ------------------------ >8 ------------------------\nshould be cut\n"
+	if err := os.WriteFile(editPath, []byte(content), 0o600); err != nil {
+		t.Fatalf("write edit file: %v", err)
+	}
+
+	got := runEditDefaultCompat(t, subdir)
+
+	if got.Ignored {
+		t.Fatal("Ignored = true, want false")
+	}
+	if !got.Valid {
+		t.Fatalf("Valid = false, want true, findings = %#v", got.Findings)
+	}
+	if diff := cmp.Diff("edit", got.Source); diff != "" {
+		t.Fatalf("Source mismatch (-want +got):\n%s", diff)
+	}
+}
+
 func TestCompatEditSanitizeCommentsAndScissors(t *testing.T) {
 	t.Parallel()
 
@@ -191,6 +242,26 @@ func TestCompatEditSanitizeCommentsAndScissors(t *testing.T) {
 	if !got.Valid {
 		t.Fatalf("Valid = false, want true, findings = %#v", got.Findings)
 	}
+}
+
+func runEditDefaultCompat(t *testing.T, workDir string) cli.JSONReport {
+	t.Helper()
+
+	result := runCommand(t, &commandInput{
+		workDir: workDir,
+		args:    []string{"lint", "--edit", "--format", "json"},
+	})
+
+	if result.exitCode != 0 {
+		t.Fatalf("exitCode = %d, want 0, stdout=%q, stderr=%q", result.exitCode, result.stdout, result.stderr)
+	}
+
+	var got cli.JSONReport
+	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
+		t.Fatalf("decode JSON report: %v", err)
+	}
+
+	return got
 }
 
 func TestCompatEditUsesCoreCommentChar(t *testing.T) {
