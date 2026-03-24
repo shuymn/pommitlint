@@ -61,6 +61,19 @@ tasks:
     cmds:
       - ./{{.BINARY_PATH}}
 
+  compat-check:
+    desc: Run differential compatibility check against commitlint
+    summary: |
+      Runs the same corpus through both commitlint (via Bun) and pommitlint,
+      comparing rule/level agreement. Differences fail the check.
+    dir: "{{.ROOT_DIR}}"
+    preconditions:
+      - sh: command -v bun >/dev/null 2>&1
+        msg: "bun is not installed. Please install it first."
+    cmds:
+      - cmd: cd tools/compat-check && bun install --frozen-lockfile
+      - go test -v -count=1 -timeout=60s -tags=compat ./tools/compat-check
+
   sync-preset:
     desc: Regenerate the normalized embedded preset artifact
     summary: |

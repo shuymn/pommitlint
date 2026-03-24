@@ -1,0 +1,402 @@
+[
+  {
+    "id": "valid-fix-basic",
+    "message": "fix: some message",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-scoped",
+    "message": "fix(scope): some message",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-scoped-mixed-case",
+    "message": "fix(scope): some Message",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-breaking-change",
+    "message": "fix(scope): some message\n\nBREAKING CHANGE: it will be significant!",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-body",
+    "message": "fix(scope): some message\n\nbody",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-bang-body",
+    "message": "fix(scope)!: some message\n\nbody",
+    "tags": ["valid"]
+  },
+  {
+    "id": "valid-fix-body-and-closes",
+    "message": "fix: issue\n\ndetailed explanation\n\nCloses: #123",
+    "tags": ["valid"]
+  },
+  {
+    "id": "invalid-type-enum",
+    "message": "foo: some message",
+    "tags": ["invalid", "type-enum"]
+  },
+  {
+    "id": "invalid-type-case-and-enum",
+    "message": "FIX: some message",
+    "tags": ["invalid", "type-case", "type-enum"]
+  },
+  {
+    "id": "invalid-type-empty",
+    "message": ": some message",
+    "tags": ["invalid", "type-empty"]
+  },
+  {
+    "id": "invalid-subject-case-sentence",
+    "message": "fix(scope): Some message",
+    "tags": ["invalid", "subject-case"]
+  },
+  {
+    "id": "invalid-subject-case-start",
+    "message": "fix(scope): Some Message",
+    "tags": ["invalid", "subject-case"]
+  },
+  {
+    "id": "invalid-subject-case-pascal",
+    "message": "fix(scope): SomeMessage",
+    "tags": ["invalid", "subject-case"]
+  },
+  {
+    "id": "invalid-subject-case-upper",
+    "message": "fix(scope): SOMEMESSAGE",
+    "tags": ["invalid", "subject-case"]
+  },
+  {
+    "id": "invalid-subject-empty",
+    "message": "fix:",
+    "tags": ["invalid", "subject-empty", "type-empty"]
+  },
+  {
+    "id": "invalid-subject-full-stop",
+    "message": "fix: some message.",
+    "tags": ["invalid", "subject-full-stop"]
+  },
+  {
+    "id": "invalid-header-max-length",
+    "message": "fix: some message that is way too long and breaks the line max-length by several characters since the max is 100",
+    "tags": ["invalid", "header-max-length"]
+  },
+  {
+    "id": "warning-footer-leading-blank",
+    "message": "fix: some message\n\nbody\nBREAKING CHANGE: It will be significant",
+    "tags": ["invalid", "footer-leading-blank"]
+  },
+  {
+    "id": "invalid-footer-max-line-length",
+    "message": "fix: some message\n\nbody\n\nBREAKING CHANGE: footer with multiple lines\nhas a message that is way too long and will break the line rule \"line-max-length\" by several characters",
+    "tags": ["invalid", "footer-max-line-length"]
+  },
+  {
+    "id": "warning-body-leading-blank",
+    "message": "fix: some message\nbody",
+    "tags": ["invalid", "body-leading-blank"]
+  },
+  {
+    "id": "invalid-body-max-line-length",
+    "message": "fix: some message\n\nbody with multiple lines\nhas a message that is way too long and will break the line rule \"line-max-length\" by several characters",
+    "tags": ["invalid", "body-max-line-length"]
+  },
+  {
+    "id": "invalid-header-trim-leading-space",
+    "message": " feat: subject",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "invalid-header-trim-trailing-space",
+    "message": "feat: subject  ",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "invalid-header-trim-both-ends",
+    "message": " feat: subject ",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "invalid-header-trim-leading-tab",
+    "message": "\tfeat: subject",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "invalid-header-trim-trailing-tab",
+    "message": "feat: subject\t",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "invalid-header-trim-both-tabs",
+    "message": "\tfeat: subject\t",
+    "tags": ["invalid", "header-trim"]
+  },
+  {
+    "id": "edge-caseless-chinese",
+    "message": "feat: 这是一次提交",
+    "tags": ["valid", "edge-case", "subject-case"]
+  },
+  {
+    "id": "edge-caseless-japanese",
+    "message": "feat: 追加する",
+    "tags": ["valid", "edge-case", "subject-case"]
+  },
+  {
+    "id": "edge-caseless-arabic",
+    "message": "feat: إضافة وظيفة جديدة",
+    "tags": ["valid", "edge-case", "subject-case"]
+  },
+  {
+    "id": "edge-caseless-hebrew",
+    "message": "fix: תיקון בעיה",
+    "tags": ["valid", "edge-case", "subject-case"]
+  },
+  {
+    "id": "edge-caseless-numeric",
+    "message": "feat: 1.0.0",
+    "tags": ["valid", "edge-case", "subject-case"]
+  },
+  {
+    "id": "edge-scope-slash",
+    "message": "type(some/scope): subject",
+    "tags": ["invalid", "edge-case", "type-enum"]
+  },
+  {
+    "id": "edge-scope-chinese",
+    "message": "fix(面试评价): 测试",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-non-conventional",
+    "message": "hello world",
+    "tags": ["invalid", "edge-case"]
+  },
+  {
+    "id": "edge-body-with-breaking-change-text",
+    "message": "feat: sub\n\nbody with BREAKING CHANGE: in the middle\n\nBREAKING CHANGE: actual",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-breaking-change-hyphen",
+    "message": "feat: subject\n\nBREAKING-CHANGE: desc",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-signed-off-by",
+    "message": "feat: subject\n\nbody\n\nSigned-off-by: Name <email>",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-crlf",
+    "message": "feat: subject\r\n\r\nbody",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-subject-ellipsis-ascii",
+    "message": "feat: subject ends with ellipsis...",
+    "tags": ["valid", "edge-case"]
+  },
+  {
+    "id": "edge-subject-ellipsis-unicode",
+    "message": "feat: subject…",
+    "tags": ["invalid", "edge-case", "subject-full-stop"]
+  },
+  {
+    "id": "edge-scope-comma",
+    "message": "type(component,demo): subject",
+    "tags": ["invalid", "edge-case", "type-enum"]
+  },
+  {
+    "id": "edge-inline-reference",
+    "message": "type(some/scope): subject #reference\n\nthings #reference",
+    "tags": ["invalid", "edge-case", "type-enum"]
+  },
+  {
+    "id": "edge-crlf-scoped",
+    "message": "type(scope): subject\r\n\r\nbody",
+    "tags": ["invalid", "edge-case", "type-enum"]
+  },
+  {
+    "id": "ignored-merge-branch",
+    "message": "Merge branch 'iss53'",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-merge-branch-multi-newline",
+    "message": "Merge branch 'ctrom-YarnBuild'\n\n\n",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-merge-tag",
+    "message": "Merge tag '1.1.1'",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-merge-tag-arbitrary",
+    "message": "Merge tag 'a tag'",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-merge-pull-request",
+    "message": "Merge pull request #369",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-revert",
+    "message": "Revert \"docs: add recipe for linting of all commits in a PR (#36)\"\n\nThis reverts commit 1e69d542c16c2a32acfd139e32efa07a45f19111.",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-revert-lowercase",
+    "message": "revert \"docs: add recipe for linting of all commits in a PR (#36)\"\n\nThis reverts commit 1e69d542c16c2a32acfd139e32efa07a45f19111.",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-reapply",
+    "message": "Reapply \"fix: something\"",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-reapply-lowercase",
+    "message": "reapply \"fix: something\"",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver",
+    "message": "v0.0.1",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-leading-space",
+    "message": " v3.0.0",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-prerelease",
+    "message": "0.0.1-some-crazy-tag",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-chore",
+    "message": "chore: 0.0.1",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-chore-release",
+    "message": "chore(release): 2.3.3-beta.1 [skip ci]",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-ci-skip-brackets",
+    "message": "2.3.3-beta.1 [ci skip]",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-ci-skip-parens",
+    "message": "2.3.3-beta.1 (ci-skip)",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-footers",
+    "message": "0.0.1\n\nSigned-off-by: Developer <example@example.com>",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-multiple-footers",
+    "message": "0.0.1\n\nSigned-off-by: Developer <example@example.com>\nChange-Id: I895114872a515a269487a683124b63303818e19c",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-fixup",
+    "message": "fixup! initial commit",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-squash",
+    "message": "squash! initial commit",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-amend",
+    "message": "amend! initial commit",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-bitbucket-merge",
+    "message": "Merged in feature/facebook-friends-sync (pull request #8)",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-bitbucket-merge-into",
+    "message": "Merged develop into feature/component-form-select-card",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-automatic-merge",
+    "message": "Automatic merge",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-auto-merged",
+    "message": "Auto-merged develop into master",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-merge-remote-tracking",
+    "message": "Merge remote-tracking branch 'origin/main'",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-azure-devops",
+    "message": "Merged PR 123: Description here",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-alpha",
+    "message": "0.0.1-alpha",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-numeric-pre",
+    "message": "0.0.1-0",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-semver-compound-pre",
+    "message": "0.0.1-alpha.0",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-ci-skip-dash-brackets",
+    "message": "2.3.3-beta.1 [skip-ci]",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-ci-skip-parens-space",
+    "message": "2.3.3-beta.1 (skip ci)",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "ignored-ci-skip-parens-reversed",
+    "message": "2.3.3-beta.1 (ci skip)",
+    "tags": ["ignored"]
+  },
+  {
+    "id": "not-ignored-merge-branch-not-at-start",
+    "message": "foo bar Merge branch xxx",
+    "tags": ["not-ignored"]
+  },
+  {
+    "id": "not-ignored-merge-tag-not-at-start",
+    "message": "foo bar Merge tag '1.1.1'",
+    "tags": ["not-ignored"]
+  },
+  {
+    "id": "not-ignored-normal-commit",
+    "message": "feat: normal commit",
+    "tags": ["not-ignored"]
+  }
+]

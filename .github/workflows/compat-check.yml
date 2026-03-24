@@ -1,0 +1,45 @@
+name: Compatibility Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+  push:
+    branches:
+      - main
+    paths:
+      - "tools/compat-check/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "tools/compat-check/**"
+
+jobs:
+  compat-check:
+    name: Compat Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Set up Task
+        uses: shuymn/github-actions/.github/actions/setup-task@417b9296c6693ab840d5bb5600a18581ab877752
+
+      - name: Run compatibility check
+        run: task compat-check

@@ -1,0 +1,11 @@
+{
+  "name": "pommitlint-compat-check",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@commitlint/config-conventional": "20.5.0",
+    "@commitlint/is-ignored": "20.0.0",
+    "@commitlint/lint": "20.0.0",
+    "conventional-changelog-conventionalcommits": "9.3.0"
+  }
+}
