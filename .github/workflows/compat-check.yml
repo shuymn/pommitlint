@@ -2,18 +2,22 @@ name: Compatibility Check
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * 1"
   push:
     branches:
       - main
     paths:
       - "tools/compat-check/**"
+      - ".github/workflows/compat-check.yml"
+      - "**/*.go"
+      - "**/*.ts"
   pull_request:
     branches:
       - main
     paths:
       - "tools/compat-check/**"
+      - ".github/workflows/compat-check.yml"
+      - "**/*.go"
+      - "**/*.ts"
 
 jobs:
   compat-check:
