@@ -2,6 +2,22 @@
   "extends": [
     "github>shuymn/github-actions#main"
   ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^@commitlint/", "^conventional-changelog-"],
+      "groupName": "commitlint"
+    },
+    {
+      "matchPackagePatterns": ["^@commitlint/", "^conventional-changelog-"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["renovate:major"]
+    },
+    {
+      "matchPackagePatterns": ["^@commitlint/", "^conventional-changelog-"],
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["renovate:minor"]
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
