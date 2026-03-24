@@ -1,53 +1,69 @@
 # pommitlint
 
+`pommitlint` is a planned Go CLI that provides `@commitlint/config-conventional` equivalent linting as a single binary. The runtime target is intentionally narrow: no runtime Node.js dependency, no config discovery, no plugin system, and no arbitrary `extends` support.
 
-This repository was initialized from a Go project template.
+## Status
 
-Replace this README with project-specific documentation once the repository has a clear purpose, setup flow, and release process.
+The repository is in the design-to-implementation handoff phase. The authoritative planning artifacts are:
 
-## Local Setup
+- [`TODO.md`](TODO.md) for Theme-level execution and closure criteria
+- [`docs/architecture.md`](docs/architecture.md) for the architecture baseline
+- [`docs/adr/005-runtime-preset-boundary.md`](docs/adr/005-runtime-preset-boundary.md) through [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for durable design decisions
 
-Use `task` as the primary entrypoint for local development. After installing the required tools, enable Git hooks:
+## Planned CLI
 
-```bash
-lefthook install
+The v1 public contract is:
+
+```text
+pommitlint lint
+pommitlint hook install
+pommitlint print-preset
+pommitlint version
 ```
 
-Useful commands:
+`lint` will support one input source at a time: `stdin`, `--message`, `--file`, or `--edit [PATH]`.
+
+## Development
+
+Use `task` as the default entrypoint:
 
 ```bash
 task
 task build
 task test
 task lint
-task fmt
 task check
 ```
 
-## Initial Customization
+Current repository tasks are still generic Go project tasks; product-specific tasks and code will be introduced in the implementation Themes described in [`TODO.md`](TODO.md).
 
-Before treating this as a real project, update the repository-specific parts:
+## Dependency Posture
 
-1. Run template initialization from the repository root. This rewrites template placeholders, refreshes shared workflows, syncs Actions settings, deletes template-only files, and creates a local commit.
+The current design decision is:
 
-```bash
-task -t .taskfiles/template.yml init
-```
+- runtime Go code: `cobra` for CLI, standard library for the rest
+- test-only helper: `github.com/google/go-cmp/cmp` when clearer diffs matter
+- maintainer-only sync: Bun + commitlint packages only
+- Git-backed tests: isolated temp repos with no ambient Git/GPG prompts or signing
 
-2. Replace [`main.go`](main.go) and any starter code with your actual application entrypoint and package layout.
-3. Rewrite this README with your project's purpose, setup, development workflow, and release information.
-4. Review [`AGENTS.md`](AGENTS.md) and [`docs/`](docs/) and keep only the rules and guidance you want in this repository.
-5. Run `task check` before your first project-specific commit.
+See [`docs/adr/006-library-selection.md`](docs/adr/006-library-selection.md) for the rationale and rejected alternatives.
+See [`docs/adr/007-git-test-isolation.md`](docs/adr/007-git-test-isolation.md) for Git/GPG test isolation policy.
+See [`docs/adr/008-non-functional-requirements.md`](docs/adr/008-non-functional-requirements.md) for the v1 security and performance baseline.
+See [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for the embedded preset notice policy.
 
-## Suggested README Sections
+## Scope
 
-When you rewrite this file, include only the sections your project actually needs, for example:
+v1 is intentionally limited to:
 
-- Project overview
-- Requirements
-- Setup
-- Local development commands
-- Testing
-- Deployment or release process
-- Repository layout
-- Links to deeper docs if needed
+- `@commitlint/config-conventional` compatibility only
+- build-time preset sync
+- single-binary runtime for hooks and CI
+- text and JSON reporting
+
+v1 explicitly excludes:
+
+- runtime JS/TS config execution
+- arbitrary shareable configs or `extends`
+- plugin support
+- prompt/interactive authoring
+- full commitlint CLI compatibility
