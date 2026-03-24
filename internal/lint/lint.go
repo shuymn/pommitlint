@@ -9,6 +9,7 @@ import (
 	"sync"
 	"unicode"
 	"unicode/utf16"
+	"unicode/utf8"
 
 	"github.com/shuymn/pommitlint/internal/preset"
 )
@@ -153,8 +154,8 @@ func newEvaluator(schema *preset.Schema, message Message) evaluator { //nolint:p
 func (e *evaluator) evaluate() error {
 	steps := []func() error{
 		e.evaluateHeader,
-		e.evaluateType,
 		e.evaluateSubject,
+		e.evaluateType,
 		e.evaluateBody,
 		e.evaluateFooter,
 	}
@@ -192,7 +193,7 @@ func (e *evaluator) evaluateType() error {
 	e.appendRule(
 		preset.RuleTypeEmpty,
 		"type",
-		e.message.Type != "",
+		e.message.Type == "",
 		"type may not be empty",
 	)
 
@@ -211,6 +212,10 @@ func (e *evaluator) evaluateType() error {
 
 	typeEnumRule := e.schema.Rules[preset.RuleTypeEnum]
 	return checkStringListValue(&typeEnumRule, func(allowed []string) error {
+		if e.message.Type == "" {
+			return nil
+		}
+
 		e.appendRule(
 			preset.RuleTypeEnum,
 			"type",
@@ -225,7 +230,7 @@ func (e *evaluator) evaluateSubject() error {
 	e.appendRule(
 		preset.RuleSubjectEmpty,
 		"subject",
-		e.message.Subject != "",
+		e.message.Subject == "",
 		"subject may not be empty",
 	)
 
@@ -234,7 +239,7 @@ func (e *evaluator) evaluateSubject() error {
 		e.appendRule(
 			preset.RuleSubjectFullStop,
 			"subject",
-			!strings.HasSuffix(e.message.Subject, disallowed),
+			strings.HasSuffix(e.message.Subject, disallowed),
 			fmt.Sprintf("subject may not end with %q", disallowed),
 		)
 		return nil
@@ -244,15 +249,16 @@ func (e *evaluator) evaluateSubject() error {
 
 	subjectCaseRule := e.schema.Rules[preset.RuleSubjectCase]
 	return checkStringListValue(&subjectCaseRule, func(disallowed []string) error {
-		if !matchesForbiddenSubjectCase(e.message.Subject, disallowed) {
+		if !startsWithCasedLetter(e.message.Subject) {
 			return nil
 		}
 
+		fact := matchesAnySubjectCase(e.message.Subject, disallowed)
 		e.appendRule(
 			preset.RuleSubjectCase,
 			"subject",
-			false,
-			fmt.Sprintf("subject must not be %s", joinCases(disallowed)),
+			fact,
+			subjectCaseMessage(subjectCaseRule.Applicable, disallowed),
 		)
 		return nil
 	})
@@ -322,9 +328,13 @@ func (e *evaluator) evaluateFooter() error {
 	})
 }
 
-func (e *evaluator) appendRule(ruleName preset.RuleName, field string, ok bool, message string) {
+func (e *evaluator) appendRule(ruleName preset.RuleName, field string, fact bool, message string) {
 	rule, exists := e.schema.Rules[ruleName]
-	if !exists || ok {
+	if !exists {
+		return
+	}
+
+	if applyApplicable(rule.Applicable, fact) {
 		return
 	}
 
@@ -400,7 +410,7 @@ func findFooterStart(lines []string) int {
 			continue
 		}
 
-		if index == 0 || lines[index-1] == "" {
+		if index == 0 || lines[index-1] == "" || isBreakingFooterLine(lines[index]) {
 			return index
 		}
 	}
@@ -479,24 +489,10 @@ var subjectCaseMatchers = map[string]func(string) bool{
 	"upper-case":    isUpperCase,
 }
 
-func matchesForbiddenSubjectCase(subject string, forbidden []string) bool {
-	if !containsASCIILetter(subject) {
-		return false
-	}
-
-	for _, bucket := range forbidden {
+func matchesAnySubjectCase(subject string, cases []string) bool {
+	for _, bucket := range cases {
 		matcher, ok := subjectCaseMatchers[bucket]
 		if ok && matcher(subject) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func containsASCIILetter(value string) bool {
-	for _, r := range value {
-		if ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') {
 			return true
 		}
 	}
@@ -515,25 +511,22 @@ func isLowerCase(value string) bool {
 }
 
 func isSentenceCase(value string) bool {
-	letters := collectASCIIWords(value)
-	if len(letters) == 0 || len(letters[0]) == 0 {
+	word, ok := firstWord(value)
+	if !ok || len(word) == 0 {
 		return false
 	}
 
-	first := letters[0]
-	if !isUpperASCII(first[0]) {
+	if !unicode.IsUpper(word[0]) {
 		return false
 	}
 
-	for wordIndex, word := range letters {
-		for index, r := range word {
-			if wordIndex == 0 && index == 0 {
-				continue
-			}
+	for index, r := range word {
+		if index == 0 {
+			continue
+		}
 
-			if isUpperASCII(r) {
-				return false
-			}
+		if unicode.IsUpper(r) {
+			return false
 		}
 	}
 
@@ -603,6 +596,26 @@ func isUpperCase(value string) bool {
 	return hasLetter
 }
 
+func firstWord(value string) ([]rune, bool) {
+	var word []rune
+	for _, r := range value {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			word = append(word, r)
+			continue
+		}
+
+		if len(word) > 0 {
+			return word, true
+		}
+	}
+
+	if len(word) == 0 {
+		return nil, false
+	}
+
+	return word, true
+}
+
 func collectASCIIWords(value string) [][]rune {
 	fields := strings.FieldsFunc(value, func(r rune) bool {
 		return !isASCIIAlphaNum(r)
@@ -646,4 +659,33 @@ func joinCases(values []string) string {
 	}
 
 	return strings.Join(values[:len(values)-1], ", ") + ", or " + values[len(values)-1]
+}
+
+func subjectCaseMessage(applicable preset.Applicable, values []string) string {
+	if applicable == preset.ApplicableNever {
+		return fmt.Sprintf("subject must not be %s", joinCases(values))
+	}
+
+	return fmt.Sprintf("subject must be %s", joinCases(values))
+}
+
+func applyApplicable(applicable preset.Applicable, fact bool) bool {
+	if applicable == preset.ApplicableNever {
+		return !fact
+	}
+
+	return fact
+}
+
+func isBreakingFooterLine(line string) bool {
+	return strings.HasPrefix(line, "BREAKING CHANGE: ") || strings.HasPrefix(line, "BREAKING-CHANGE: ")
+}
+
+func startsWithCasedLetter(value string) bool {
+	if value == "" {
+		return false
+	}
+
+	r, _ := utf8.DecodeRuneInString(value)
+	return unicode.IsUpper(r) || unicode.IsLower(r) || unicode.IsTitle(r)
 }
