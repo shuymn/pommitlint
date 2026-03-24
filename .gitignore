@@ -1,5 +1,6 @@
 # Binary
 /pommitlint
+/sync-preset
 
 # Test coverage
 /coverage.out
@@ -18,3 +19,6 @@
 
 # env files
 .env
+
+# Bun install output
+/tools/sync-preset/node_modules/

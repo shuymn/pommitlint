@@ -61,6 +61,19 @@ tasks:
     cmds:
       - ./{{.BINARY_PATH}}
 
+  sync-preset:
+    desc: Regenerate the normalized embedded preset artifact
+    summary: |
+      Resolves @commitlint/config-conventional through Bun and rewrites
+      internal/preset/preset.json using the normalized runtime schema.
+    dir: "{{.ROOT_DIR}}"
+    preconditions:
+      - sh: command -v bun >/dev/null 2>&1
+        msg: "bun is not installed. Please install it first."
+    cmds:
+      - cmd: cd tools/sync-preset && bun install --frozen-lockfile
+      - go run ./tools/sync-preset
+
   test:
     desc: Run tests with race detection and shuffle
     summary: |
