@@ -20,5 +20,8 @@
 # env files
 .env
 
+# GoReleaser output
+/dist/
+
 # Bun install output
 node_modules/
