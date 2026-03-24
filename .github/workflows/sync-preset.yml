@@ -1,0 +1,76 @@
+name: Sync Preset
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+    paths:
+      - "tools/sync-preset/package.json"
+      - "tools/sync-preset/bun.lock"
+
+concurrency:
+  group: sync-preset-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: startsWith(github.head_ref, 'renovate/')
+    permissions:
+      contents: read
+    env:
+      SYNC_COMMIT_MESSAGE: "chore: sync preset"
+    steps:
+      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          permission-contents: write
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check for existing sync commit
+        id: check
+        run: |
+          if git log --format=%s origin/main..HEAD | grep -qF "$SYNC_COMMIT_MESSAGE"; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Go
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Bun
+        if: steps.check.outputs.skip != 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      - name: Run sync-preset
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          (cd tools/sync-preset && bun install --frozen-lockfile)
+          go run ./tools/sync-preset
+
+      - name: Commit and push changes
+        if: steps.check.outputs.skip != 'true'
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git add internal/preset/preset.json
+          if git diff --cached --quiet; then
+            echo "No changes to preset.json"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "$SYNC_COMMIT_MESSAGE"
+          git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push
