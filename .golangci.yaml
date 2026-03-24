@@ -163,7 +163,6 @@ formatters:
     - gofmt
     - gofumpt
     - goimports
-    - golines
 
   settings:
     gci:
@@ -182,10 +181,6 @@ formatters:
     goimports:
       local-prefixes:
         - github.com/shuymn/pommitlint
-
-    golines:
-      max-len: 120
-      reformat-tags: false
 
   exclusions:
     generated: strict
