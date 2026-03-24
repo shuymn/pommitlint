@@ -38,7 +38,10 @@ func TestNoNetworkLint(t *testing.T) {
 func TestNoShellInterpolation(t *testing.T) {
 	t.Parallel()
 
-	marker := filepath.Join(t.TempDir(), "executed-from-message")
+	// Use os.TempDir() directly to keep the header under 100 characters;
+	// t.TempDir() returns a long platform-specific path on some systems.
+	marker := filepath.Join(os.TempDir(), "pommitlint-noshell-marker")
+	t.Cleanup(func() { _ = os.Remove(marker) })
 	message := "feat: $(touch " + marker + ")"
 
 	result := runCommand(t, &commandInput{
