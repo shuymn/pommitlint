@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "source": {
+    "configPackage": "@commitlint/config-conventional",
+    "parserPresetPackage": "conventional-changelog-conventionalcommits"
+  },
+  "rules": {
+    "body-leading-blank": {
+      "level": 1,
+      "applicable": "always"
+    },
+    "body-max-line-length": {
+      "level": 2,
+      "applicable": "always",
+      "value": 100
+    },
+    "footer-leading-blank": {
+      "level": 1,
+      "applicable": "always"
+    },
+    "footer-max-line-length": {
+      "level": 2,
+      "applicable": "always",
+      "value": 100
+    },
+    "header-max-length": {
+      "level": 2,
+      "applicable": "always",
+      "value": 100
+    },
+    "header-trim": {
+      "level": 2,
+      "applicable": "always"
+    },
+    "subject-case": {
+      "level": 2,
+      "applicable": "never",
+      "value": [
+        "sentence-case",
+        "start-case",
+        "pascal-case",
+        "upper-case"
+      ]
+    },
+    "subject-empty": {
+      "level": 2,
+      "applicable": "never"
+    },
+    "subject-full-stop": {
+      "level": 2,
+      "applicable": "never",
+      "value": "."
+    },
+    "type-case": {
+      "level": 2,
+      "applicable": "always",
+      "value": "lower-case"
+    },
+    "type-empty": {
+      "level": 2,
+      "applicable": "never"
+    },
+    "type-enum": {
+      "level": 2,
+      "applicable": "always",
+      "value": [
+        "build",
+        "chore",
+        "ci",
+        "docs",
+        "feat",
+        "fix",
+        "perf",
+        "refactor",
+        "revert",
+        "style",
+        "test"
+      ]
+    }
+  },
+  "parserPreset": {
+    "name": "conventional-changelog-conventionalcommits",
+    "headerPattern": {
+      "source": "^(\\w*)(?:\\((.*)\\))?!?: (.*)$",
+      "flags": ""
+    },
+    "breakingHeaderPattern": {
+      "source": "^(\\w*)(?:\\((.*)\\))?!: (.*)$",
+      "flags": ""
+    },
+    "headerCorrespondence": [
+      "type",
+      "scope",
+      "subject"
+    ],
+    "noteKeywords": [
+      "BREAKING CHANGE",
+      "BREAKING-CHANGE"
+    ],
+    "revertPattern": {
+      "source": "^(?:Revert|revert:)\\s\"?([\\s\\S]+?)\"?\\s*This reverts commit (\\w*)\\.",
+      "flags": "i"
+    },
+    "revertCorrespondence": [
+      "header",
+      "hash"
+    ],
+    "issuePrefixes": [
+      "#"
+    ]
+  }
+}
