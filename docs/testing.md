@@ -21,6 +21,18 @@ Use this file only when the task explicitly points to repository-specific test r
 - Prefer real resources at package boundaries (`httptest`, temp dirs, subprocesses) over deep mocks.
 - Mock only external systems that cannot be run locally.
 
+## Git-backed Tests
+
+- Any test that invokes `git` must use a temporary repository and must not mutate the real workspace repository.
+- Git-backed tests must isolate themselves from developer machine config and prompts.
+  - Set `HOME`, `XDG_CONFIG_HOME`, and `GNUPGHOME` to temp directories.
+  - Set `GIT_CONFIG_NOSYSTEM=1` and `GIT_CONFIG_GLOBAL=/dev/null`.
+  - Set `GIT_TERMINAL_PROMPT=0`, `GIT_ASKPASS=/bin/false`, `SSH_ASKPASS=/bin/false`, and `GCM_INTERACTIVE=Never`.
+- Any test path that can create a commit or tag must invoke Git with `-c commit.gpgsign=false -c tag.gpgsign=false`.
+- Use an empty temp hooks directory by default so global or inherited hooks never run during tests.
+- Prefer direct file-based assertions over real commits unless the acceptance contract specifically requires Git hook execution or `core.hooksPath` behavior.
+- Centralize this setup in a shared test helper; do not hand-roll partial Git isolation in each test.
+
 ## Linter Exceptions
 
 - `_test.go` files relax `exhaustruct`, `funlen`, `gocognit`, `noctx`, and `contextcheck`.
