@@ -1,0 +1,64 @@
+- [ ] Theme: Preset sync と runtime 境界を固定する
+  - Outcome: upstream の `@commitlint/config-conventional` を build-time に正規化し、runtime は embed 済み preset だけで動く。
+  - Goal: Bun ベースの sync 導線、正規化 preset schema、sync failure policy を固定する。
+  - Must Not Break: runtime への Node/Bun/npm 依存持ち込み、unknown rule / parser field の黙殺、resolved config の丸ごと dump。
+  - Non-goals: arbitrary `extends`、任意 `parserPreset`、JS/TS config 実行、plugin system、formatter/prompt 取り込み。
+  - Acceptance (EARS):
+    - When maintainer runs `task sync-preset`, the repository shall regenerate a normalized `internal/preset/preset.json` from `@commitlint/config-conventional` and its resolved parser preset only.
+    - If sync observes an unknown rule, unsupported parser field, or non-normalizable function value, the sync command shall fail without writing a partially accepted artifact.
+  - Evidence: `run=task sync-preset && git diff --exit-code -- internal/preset tools/sync-preset; oracle=sync succeeds with only normalized artifact changes and fails closed on unsupported upstream fields; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./tools/sync-preset/... -run 'TestSyncPreset|TestNormalizePreset'; notes=snapshot/no-diff validation is the canonical closure evidence for preset sync.`
+  - Gates: `static`, `integration`
+  - Executable doc: `task sync-preset` regenerates normalized preset artifacts and a repeat run produces no diff.
+  - Why not split vertically further?: parser/rules/runtime の全 Theme がこの artifact contract に依存するため、先に閉じないと後続の public contract が揺れる。
+  - Escalate if: upstream resolved config に schema 化不能な値が含まれ、fail-closed 以外で前進できないと判明した場合。
+
+- [ ] Theme: `lint` runtime の public contract を成立させる
+  - Outcome: 単一バイナリが `config-conventional` 相当の lint を text/json で返せる。
+  - Goal: CLI 入力契約、AST、rule engine、report schema、exit code を一気通しで固定する。
+  - Must Not Break: `config-conventional` の rule 値改変、UTF-16 長さ判定の互換性低下、warning/error exit code 契約の曖昧化、通常的な commit message 入力で体感待ちが発生する実行時間。
+  - Non-goals: range lint、完全 commitlint 互換、JS config 実行、plugin system、interactive authoring。
+  - Acceptance (EARS):
+    - When `pommitlint lint` receives a valid conventional commit via `stdin`, `--message`, `--file`, or `--edit`, the command shall emit success in the selected format and exit `0`.
+    - When enabled rules detect violations in header, body, or footer, the command shall emit stable findings with correct level and exit code semantics.
+    - If a body line contains a URL, `body-max-line-length` shall ignore that line, and `footer-max-line-length` shall not inherit that exception.
+    - If a subject is non-Latin only, `subject-case` shall not fail unless the subject clearly matches a forbidden case bucket.
+    - When linting a typical single commit message, the command shall complete without network access, without spawning external parsers, and with work proportional to input length.
+  - Evidence: `run=task check && go test ./... -run 'TestLint|TestParser|TestReport'; oracle=fixtures and contract tests prove lint output, JSON shape, and exit codes across valid/invalid messages; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay'; notes=system-level fixture replay is the primary closure check for the runtime contract.`
+  - Gates: `static`, `integration`, `system`
+  - Executable doc: `go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay'` proves text/json output and CLI exit codes for each input mode.
+  - Why not split vertically further?: parser、rules、report を別 Theme にすると AST と finding schema の責務境界が二重定義になりやすい。
+  - Escalate if: commitlint upstream docs と設計書の期待が衝突し、1 つの pass/fail 契約に収束しない場合。
+
+- [ ] Theme: message source / ignore / hook install を安定化する
+  - Outcome: `commit-msg` hook と CI で同じ lint 動作を再現できる。
+  - Goal: `--edit` 読み取り、Git comment/scissors 除去、default ignore、hook install の安全な振る舞いを固定する。
+  - Must Not Break: `commit-msg` hook 前提運用、既存 hook の保護、`core.hooksPath` の尊重、`--no-default-ignores` の明示 opt-out、開発者の global Git/GPG/1Password 設定への干渉。
+  - Non-goals: hook manager 連携、git range 取得、pre-commit hook 対応、interactive workflow。
+  - Acceptance (EARS):
+    - When `pommitlint lint --edit` is called without a path, the command shall read `./.git/COMMIT_EDITMSG`, strip Git comment lines, ignore content after scissors, normalize trailing blank lines, and lint the sanitized message.
+    - When default ignore matches merge, revert, semver tag, or auto-merge messages, the command shall report ignored success unless `--no-default-ignores` is set.
+    - If `pommitlint hook install` encounters an existing target hook and `--force` is absent, the command shall fail without overwriting it.
+    - When `core.hooksPath` is configured, `pommitlint hook install` shall target that directory unless `--hooks-dir` explicitly overrides it.
+    - When tests create temporary Git repositories, they shall execute with isolated Git environment variables and explicit `commit.gpgsign=false` so no interactive signing or credential prompt can occur.
+  - Evidence: `run=go test ./... -run 'TestEditMode|TestIgnore|TestHookInstall'; oracle=temp-repo scenario tests prove edit sanitization, ignore decisions, and hook target resolution/overwrite protection; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestHookInstallCoreHooksPathReplay|TestHookInstallForceGuardReplay|TestGitIsolationNoSignReplay'; notes=hook installation is closed only when path resolution and overwrite guards are exercised against real git metadata.`
+  - Gates: `static`, `integration`, `system`
+  - Executable doc: `go test ./... -run 'TestEditMode|TestIgnore|TestHookInstall|TestHookInstallCoreHooksPathReplay|TestHookInstallForceGuardReplay|TestGitIsolationNoSignReplay'` replays `--edit`, default ignore, `core.hooksPath`, `hook install` overwrite protection, and isolated no-sign commit flows.
+  - Why not split vertically further?: input sanitization と hook install は user-facing replay 手順を共有しており、分離すると acceptance と evidence が重複する。
+  - Escalate if: Git comment/scissors 除去仕様が実 commit message 例で矛盾し、単一の sanitization policy を定義できない場合。
+
+- [ ] Theme: verification / release metadata / docs を閉じる
+  - Outcome: v1 を close できる checks、配布 metadata、利用者向け最低限 docs が揃う。
+  - Goal: `task` 導線、golden/fuzz tests、`THIRD_PARTY_NOTICES.md`、README、設計 artifact の整合性、非機能要件の replay を固定する。
+  - Must Not Break: `task check` の標準導線、ライセンス notice 欠落、未検証での merge 判定、セキュリティ/性能要件の未証明なままの close、embed 済み preset 由来物に対する attribution 不足。
+  - Non-goals: package manager 配布、CI/CD の拡張、自動 release pipeline、v2 scope の文書化。
+  - Acceptance (EARS):
+    - When `task check` runs after implementation, it shall cover lint, build, test, and tidy without leaving repo-tracked diffs.
+    - If preset sync is rerun without upstream changes, snapshot verification shall show no diff.
+    - When shipping v1, the repository shall contain `LICENSE`, `THIRD_PARTY_NOTICES.md`, updated README, and the design artifacts needed to replay closure decisions.
+    - When shipping an embedded preset artifact, `THIRD_PARTY_NOTICES.md` shall include attribution and license text for the upstream packages whose data is redistributed through that artifact.
+    - When shipping v1, the repository shall include replayable evidence that lint runtime stays offline, bounded by input size, and does not execute untrusted config or shell content from commit messages.
+  - Evidence: `run=task check && task sync-preset && git diff --exit-code && go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'; oracle=full verification passes, repeat sync/check leave the repo clean, and targeted non-functional tests prove offline/runtime-boundary behavior; visibility=independent; controls=[agent,context]; missing=[]; companion=none; notes=repo-clean after check/sync plus targeted non-functional replay is the final release-readiness gate.`
+  - Gates: `static`, `integration`, `system`
+  - Executable doc: `task check`, repeat `task sync-preset`, and `go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'` complete successfully with no repo-tracked diff.
+  - Why not split vertically further?: release metadata と closure docs は merge 判定に直結するため、最後の close 条件として 1 Theme に束ねる。
+  - Escalate if: upstream attribution や shipped artifact の法的要件が現在の notice 方針を超える場合、または embed artifact のライセンス範囲が単純な notice 同梱では解釈できない場合。
