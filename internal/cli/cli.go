@@ -322,8 +322,8 @@ func normalizeArgs(args []string) []string {
 }
 
 var defaultIgnorePatterns = []func(string) bool{
-	regexp.MustCompile(`^((Merge pull request)|(Merge (.*?) into (.*?)|(Merge branch (.*?)))(?:\r?\n)*$)`).MatchString,
-	regexp.MustCompile(`^(Merge tag (.*?))(?:\r?\n)*$`).MatchString,
+	regexp.MustCompile(`(?m)^((Merge pull request)|(Merge (.*?) into (.*?)|(Merge branch (.*?)))(?:\r?\n)*$)`).MatchString,
+	regexp.MustCompile(`(?m)^(Merge tag (.*?))(?:\r?\n)*$`).MatchString,
 	regexp.MustCompile(`^(R|r)evert (.*)`).MatchString,
 	regexp.MustCompile(`^(R|r)eapply (.*)`).MatchString,
 	regexp.MustCompile(`^(amend|fixup|squash)!`).MatchString,
