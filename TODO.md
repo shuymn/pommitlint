@@ -29,7 +29,7 @@
   - Why not split vertically further?: parser、rules、report を別 Theme にすると AST と finding schema の責務境界が二重定義になりやすい。
   - Escalate if: commitlint upstream docs と設計書の期待が衝突し、1 つの pass/fail 契約に収束しない場合。
 
-- [ ] Theme: message source / ignore / hook install を安定化する
+- [x] Theme: message source / ignore / hook install を安定化する
   - Outcome: `commit-msg` hook と CI で同じ lint 動作を再現できる。
   - Goal: `--edit` 読み取り、Git comment/scissors 除去、default ignore、hook install の安全な振る舞いを固定する。
   - Must Not Break: `commit-msg` hook 前提運用、既存 hook の保護、`core.hooksPath` の尊重、`--no-default-ignores` の明示 opt-out、開発者の global Git/GPG/1Password 設定への干渉。
