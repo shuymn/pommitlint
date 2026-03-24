@@ -173,11 +173,16 @@ func (e *evaluator) evaluate() error {
 
 func (e *evaluator) evaluateHeader() error {
 	trimFact, trimMsg := headerTrimCheck(e.message.Header)
-	e.appendRule(preset.RuleHeaderTrim, "header", trimFact, trimMsg)
+	e.reportIfViolation(preset.RuleHeaderTrim, "header", trimFact, trimMsg)
 
-	headerMaxRule := e.schema.Rules[preset.RuleHeaderMaxLength]
+	headerMaxRule, exists := e.schema.Rules[preset.RuleHeaderMaxLength]
+	if !exists {
+		return nil
+	}
+
 	return checkMaxLength(&headerMaxRule, func(limit int) error {
-		e.appendRule(
+		e.reportIfViolationWith(
+			&headerMaxRule,
 			preset.RuleHeaderMaxLength,
 			"header",
 			utf16Length(e.message.Header) <= limit,
@@ -188,84 +193,96 @@ func (e *evaluator) evaluateHeader() error {
 }
 
 func (e *evaluator) evaluateType() error {
-	e.appendRule(
+	e.reportIfViolation(
 		preset.RuleTypeEmpty,
 		"type",
 		e.message.Type == "",
 		"type may not be empty",
 	)
 
-	typeCaseRule := e.schema.Rules[preset.RuleTypeCase]
-	if err := checkStringValue(&typeCaseRule, func(expected string) error {
-		e.appendRule(
-			preset.RuleTypeCase,
-			"type",
-			matchCase(e.message.Type, expected),
-			fmt.Sprintf("type must be %s", expected),
-		)
-		return nil
-	}); err != nil {
-		return err
+	if typeCaseRule, exists := e.schema.Rules[preset.RuleTypeCase]; exists {
+		if err := checkStringValue(&typeCaseRule, func(expected string) error {
+			e.reportIfViolationWith(
+				&typeCaseRule,
+				preset.RuleTypeCase,
+				"type",
+				matchCase(e.message.Type, expected),
+				fmt.Sprintf("type must be %s", expected),
+			)
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
 
-	typeEnumRule := e.schema.Rules[preset.RuleTypeEnum]
-	return checkStringListValue(&typeEnumRule, func(allowed []string) error {
-		if e.message.Type == "" {
-			return nil
-		}
+	if typeEnumRule, exists := e.schema.Rules[preset.RuleTypeEnum]; exists {
+		return checkStringListValue(&typeEnumRule, func(allowed []string) error {
+			if e.message.Type == "" {
+				return nil
+			}
 
-		e.appendRule(
-			preset.RuleTypeEnum,
-			"type",
-			slices.Contains(allowed, e.message.Type),
-			fmt.Sprintf("type must be one of: %s", strings.Join(allowed, ", ")),
-		)
-		return nil
-	})
+			e.reportIfViolationWith(
+				&typeEnumRule,
+				preset.RuleTypeEnum,
+				"type",
+				slices.Contains(allowed, e.message.Type),
+				fmt.Sprintf("type must be one of: %s", strings.Join(allowed, ", ")),
+			)
+			return nil
+		})
+	}
+
+	return nil
 }
 
 func (e *evaluator) evaluateSubject() error {
-	e.appendRule(
+	e.reportIfViolation(
 		preset.RuleSubjectEmpty,
 		"subject",
 		e.message.Subject == "",
 		"subject may not be empty",
 	)
 
-	subjectFullStopRule := e.schema.Rules[preset.RuleSubjectFullStop]
-	if err := checkStringValue(&subjectFullStopRule, func(disallowed string) error {
-		hasStop := strings.HasSuffix(e.message.Subject, disallowed) && !strings.HasSuffix(e.message.Subject, subjectEllipsis)
-		e.appendRule(
-			preset.RuleSubjectFullStop,
-			"subject",
-			hasStop,
-			fmt.Sprintf("subject may not end with %q", disallowed),
-		)
-		return nil
-	}); err != nil {
-		return err
+	if subjectFullStopRule, exists := e.schema.Rules[preset.RuleSubjectFullStop]; exists {
+		if err := checkStringValue(&subjectFullStopRule, func(disallowed string) error {
+			hasStop := strings.HasSuffix(e.message.Subject, disallowed) && !strings.HasSuffix(e.message.Subject, subjectEllipsis)
+			e.reportIfViolationWith(
+				&subjectFullStopRule,
+				preset.RuleSubjectFullStop,
+				"subject",
+				hasStop,
+				fmt.Sprintf("subject may not end with %q", disallowed),
+			)
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
 
-	subjectCaseRule := e.schema.Rules[preset.RuleSubjectCase]
-	return checkStringListValue(&subjectCaseRule, func(disallowed []string) error {
-		if !startsWithCasedLetter(e.message.Subject) {
-			return nil
-		}
+	if subjectCaseRule, exists := e.schema.Rules[preset.RuleSubjectCase]; exists {
+		return checkStringListValue(&subjectCaseRule, func(disallowed []string) error {
+			if !startsWithCasedLetter(e.message.Subject) {
+				return nil
+			}
 
-		fact := matchesAnySubjectCase(e.message.Subject, disallowed)
-		e.appendRule(
-			preset.RuleSubjectCase,
-			"subject",
-			fact,
-			subjectCaseMessage(subjectCaseRule.Applicable, disallowed),
-		)
-		return nil
-	})
+			fact := matchesAnySubjectCase(e.message.Subject, disallowed)
+			e.reportIfViolationWith(
+				&subjectCaseRule,
+				preset.RuleSubjectCase,
+				"subject",
+				fact,
+				subjectCaseMessage(subjectCaseRule.Applicable, disallowed),
+			)
+			return nil
+		})
+	}
+
+	return nil
 }
 
 func (e *evaluator) evaluateBody() error {
 	if len(e.message.BodyLines) > 0 {
-		e.appendRule(
+		e.reportIfViolation(
 			preset.RuleBodyLeadingBlank,
 			"body",
 			e.message.BodyLeadingBlank,
@@ -273,7 +290,11 @@ func (e *evaluator) evaluateBody() error {
 		)
 	}
 
-	bodyMaxRule := e.schema.Rules[preset.RuleBodyMaxLineLength]
+	bodyMaxRule, exists := e.schema.Rules[preset.RuleBodyMaxLineLength]
+	if !exists {
+		return nil
+	}
+
 	return checkMaxLength(&bodyMaxRule, func(limit int) error {
 		for index, line := range e.message.BodyLines {
 			if line == "" || containsURL(line) {
@@ -281,7 +302,8 @@ func (e *evaluator) evaluateBody() error {
 			}
 
 			if utf16Length(line) > limit {
-				e.appendRule(
+				e.reportIfViolationWith(
+					&bodyMaxRule,
 					preset.RuleBodyMaxLineLength,
 					"body",
 					false,
@@ -297,7 +319,7 @@ func (e *evaluator) evaluateBody() error {
 
 func (e *evaluator) evaluateFooter() error {
 	if len(e.message.FooterLines) > 0 {
-		e.appendRule(
+		e.reportIfViolation(
 			preset.RuleFooterLeadingBlank,
 			"footer",
 			e.message.FooterLeadingBlank,
@@ -305,7 +327,11 @@ func (e *evaluator) evaluateFooter() error {
 		)
 	}
 
-	footerMaxRule := e.schema.Rules[preset.RuleFooterMaxLineLength]
+	footerMaxRule, exists := e.schema.Rules[preset.RuleFooterMaxLineLength]
+	if !exists {
+		return nil
+	}
+
 	return checkMaxLength(&footerMaxRule, func(limit int) error {
 		for index, line := range e.message.FooterLines {
 			if line == "" {
@@ -313,7 +339,8 @@ func (e *evaluator) evaluateFooter() error {
 			}
 
 			if utf16Length(line) > limit {
-				e.appendRule(
+				e.reportIfViolationWith(
+					&footerMaxRule,
 					preset.RuleFooterMaxLineLength,
 					"footer",
 					false,
@@ -327,19 +354,23 @@ func (e *evaluator) evaluateFooter() error {
 	})
 }
 
-func (e *evaluator) appendRule(ruleName preset.RuleName, field string, fact bool, message string) {
+func (e *evaluator) reportIfViolation(ruleName preset.RuleName, field string, fact bool, message string) {
 	rule, exists := e.schema.Rules[ruleName]
 	if !exists {
 		return
 	}
 
+	e.reportIfViolationWith(&rule, ruleName, field, fact, message)
+}
+
+func (e *evaluator) reportIfViolationWith(rule *preset.Rule, ruleName preset.RuleName, field string, fact bool, message string) {
 	if applyApplicable(rule.Applicable, fact) {
 		return
 	}
 
 	e.findings = append(e.findings, Finding{
 		Rule:    ruleName,
-		Level:   levelFromRule(&rule),
+		Level:   levelFromRule(rule),
 		Field:   field,
 		Message: message,
 	})
