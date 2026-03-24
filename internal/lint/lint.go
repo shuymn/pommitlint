@@ -21,6 +21,8 @@ const (
 	LevelError   Level = "error"
 )
 
+const subjectEllipsis = "..."
+
 type Finding struct {
 	Rule    preset.RuleName `json:"rule"`
 	Level   Level           `json:"level"`
@@ -170,12 +172,8 @@ func (e *evaluator) evaluate() error {
 }
 
 func (e *evaluator) evaluateHeader() error {
-	e.appendRule(
-		preset.RuleHeaderTrim,
-		"header",
-		e.message.Header == strings.TrimSpace(e.message.Header),
-		"header must not have leading or trailing whitespace",
-	)
+	trimFact, trimMsg := headerTrimCheck(e.message.Header)
+	e.appendRule(preset.RuleHeaderTrim, "header", trimFact, trimMsg)
 
 	headerMaxRule := e.schema.Rules[preset.RuleHeaderMaxLength]
 	return checkMaxLength(&headerMaxRule, func(limit int) error {
@@ -236,10 +234,11 @@ func (e *evaluator) evaluateSubject() error {
 
 	subjectFullStopRule := e.schema.Rules[preset.RuleSubjectFullStop]
 	if err := checkStringValue(&subjectFullStopRule, func(disallowed string) error {
+		hasStop := strings.HasSuffix(e.message.Subject, disallowed) && !strings.HasSuffix(e.message.Subject, subjectEllipsis)
 		e.appendRule(
 			preset.RuleSubjectFullStop,
 			"subject",
-			strings.HasSuffix(e.message.Subject, disallowed),
+			hasStop,
 			fmt.Sprintf("subject may not end with %q", disallowed),
 		)
 		return nil
@@ -667,6 +666,22 @@ func subjectCaseMessage(applicable preset.Applicable, values []string) string {
 	}
 
 	return fmt.Sprintf("subject must be %s", joinCases(values))
+}
+
+func headerTrimCheck(header string) (bool, string) {
+	hasLeading := len(strings.TrimLeftFunc(header, unicode.IsSpace)) < len(header)
+	hasTrailing := len(strings.TrimRightFunc(header, unicode.IsSpace)) < len(header)
+
+	switch {
+	case hasLeading && hasTrailing:
+		return false, "header must not be surrounded by whitespace"
+	case hasLeading:
+		return false, "header must not start with whitespace"
+	case hasTrailing:
+		return false, "header must not end with whitespace"
+	default:
+		return true, ""
+	}
 }
 
 func applyApplicable(applicable preset.Applicable, fact bool) bool {
