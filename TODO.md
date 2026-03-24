@@ -1,4 +1,4 @@
-- [ ] Theme: Preset sync と runtime 境界を固定する
+- [x] Theme: Preset sync と runtime 境界を固定する
   - Outcome: upstream の `@commitlint/config-conventional` を build-time に正規化し、runtime は embed 済み preset だけで動く。
   - Goal: Bun ベースの sync 導線、正規化 preset schema、sync failure policy を固定する。
   - Must Not Break: runtime への Node/Bun/npm 依存持ち込み、unknown rule / parser field の黙殺、resolved config の丸ごと dump。
