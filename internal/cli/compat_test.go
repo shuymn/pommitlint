@@ -93,6 +93,20 @@ func TestCompatDefaultIgnores(t *testing.T) {
 			wantExit:    0,
 		},
 		{
+			name:        "reapply-uppercase",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "Reapply \"fix: something\"",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "reapply-lowercase",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "reapply \"fix: something\"",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
 			name:        "semver",
 			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
 			message:     "v0.0.1",
@@ -239,6 +253,77 @@ func TestCompatDefaultIgnores(t *testing.T) {
 			args:        []string{"--no-default-ignores"},
 			wantIgnored: false,
 			wantExit:    1,
+		},
+
+		// semver pre-release variations
+		{
+			name:        "semver-prerelease-alpha",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "0.0.1-alpha",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "semver-prerelease-numeric",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "0.0.1-0",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "semver-prerelease-compound",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "0.0.1-alpha.0",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+
+		// CI skip marker variations
+		{
+			name:        "ci-skip-brackets-dash",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "2.3.3-beta.1 [skip-ci]",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "ci-skip-parens-space",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "2.3.3-beta.1 (skip ci)",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "ci-skip-parens-reversed",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "2.3.3-beta.1 (ci skip)",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+
+		// chore + semver + CI skip combinations
+		{
+			name:        "chore-semver-ci-skip",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "chore: 2.3.3-beta.1 [ci skip]",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+		{
+			name:        "chore-release-semver-ci-skip",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "chore(release): 2.3.3-beta.1 [ci skip]",
+			wantIgnored: true,
+			wantExit:    0,
+		},
+
+		// false case: normal valid commit should not be ignored
+		{
+			name:        "false-normal-commit",
+			origin:      "@commitlint/is-ignored/src/is-ignored.test.ts",
+			message:     "feat: normal commit",
+			wantIgnored: false,
+			wantExit:    0,
 		},
 	}
 
