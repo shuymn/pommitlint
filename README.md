@@ -1,83 +1,92 @@
 # pommitlint
 
-`pommitlint` is a Go CLI that provides `@commitlint/config-conventional` equivalent linting as a single binary. The runtime target is intentionally narrow: no runtime Node.js dependency, no config discovery, no plugin system, and no arbitrary `extends` support.
+Single-binary commit message linter compatible with [`@commitlint/config-conventional`](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional). No Node.js runtime required.
 
-## Status
+## Install
 
-The repository ships the v1 lint runtime and hook installer. The authoritative closure artifacts are:
+```bash
+go install github.com/shuymn/pommitlint@latest
+```
 
-- [`TODO.md`](TODO.md) for Theme-level execution and closure criteria
-- [`docs/architecture.md`](docs/architecture.md) for the architecture baseline
-- [`docs/adr/005-runtime-preset-boundary.md`](docs/adr/005-runtime-preset-boundary.md) through [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for durable design decisions
+## Usage
 
-## CLI
+### Lint a commit message
 
-The current public commands are:
+```bash
+# from stdin
+echo "feat(auth): add login endpoint" | pommitlint lint
 
-```text
-pommitlint lint
+# from a string
+pommitlint lint --message "fix: resolve nil pointer"
+
+# from a file
+pommitlint lint --file COMMIT_MSG.txt
+
+# from the Git edit file (used by hooks)
+pommitlint lint --edit
+```
+
+`--format json` switches to JSON output:
+
+```bash
+pommitlint lint --format json --message "feat: add feature"
+```
+
+```json
+{
+  "source": "message",
+  "valid": true,
+  "ignored": false,
+  "errorCount": 0,
+  "warningCount": 0,
+  "findings": []
+}
+```
+
+### Install a Git hook
+
+```bash
 pommitlint hook install
 ```
 
-`lint` supports one input source at a time: `stdin`, `--message`, `--file`, or `--edit [PATH]`.
+This writes a `commit-msg` hook that runs `pommitlint lint --edit "$1"`. Use `--force` to overwrite an existing hook, or `--hooks-dir` to specify a custom hooks directory.
+
+### Default ignores
+
+Merge commits, reverts, fixups, squashes, and version tags are ignored by default. Pass `--no-default-ignores` to disable this behavior.
+
+## Rules
+
+pommitlint enforces the following rules from `@commitlint/config-conventional`:
+
+| Rule | Description |
+|---|---|
+| `body-leading-blank` | Body must begin with a blank line |
+| `body-max-line-length` | Body lines must not exceed 100 characters |
+| `footer-leading-blank` | Footer must begin with a blank line |
+| `footer-max-line-length` | Footer lines must not exceed 100 characters |
+| `header-max-length` | Header must not exceed 100 characters |
+| `header-trim` | Header must not have leading/trailing whitespace |
+| `subject-case` | Subject must not be sentence-case, start-case, pascal-case, or upper-case |
+| `subject-empty` | Subject must not be empty |
+| `subject-full-stop` | Subject must not end with a period |
+| `type-case` | Type must be lower-case |
+| `type-empty` | Type must not be empty |
+| `type-enum` | Type must be one of: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test` |
 
 ## Development
 
-Use `task` as the default entrypoint:
+Requires [Task](https://taskfile.dev/).
 
 ```bash
-task
-task build
-task test
-task lint
-task check
-task sync-preset
+task build     # build the binary
+task test      # run tests with race detection
+task lint      # run linter
+task check     # lint + build + test
 ```
 
-`task check` is the CI-equivalent verification entrypoint. `task sync-preset` regenerates the embedded normalized preset and is expected to be idempotent when upstream inputs do not change.
+## License
 
-## Dependency Posture
+[MIT](LICENSE)
 
-The current design decision is:
-
-- runtime Go code: `cobra` for CLI, standard library for the rest
-- test-only helper: `github.com/google/go-cmp/cmp` when clearer diffs matter
-- maintainer-only sync: Bun + commitlint packages only
-- Git-backed tests: isolated temp repos with no ambient Git/GPG prompts or signing
-
-See [`docs/adr/006-library-selection.md`](docs/adr/006-library-selection.md) for the rationale and rejected alternatives.
-See [`docs/adr/007-git-test-isolation.md`](docs/adr/007-git-test-isolation.md) for Git/GPG test isolation policy.
-See [`docs/adr/008-non-functional-requirements.md`](docs/adr/008-non-functional-requirements.md) for the v1 security and performance baseline.
-See [`docs/adr/009-embedded-preset-license-notices.md`](docs/adr/009-embedded-preset-license-notices.md) for the embedded preset notice policy.
-
-Release artifacts must include [`LICENSE`](LICENSE) and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-
-## Scope
-
-v1 is intentionally limited to:
-
-- `@commitlint/config-conventional` compatibility only
-- build-time preset sync
-- single-binary runtime for hooks and CI
-- text and JSON reporting
-
-v1 explicitly excludes:
-
-- runtime JS/TS config execution
-- arbitrary shareable configs or `extends`
-- plugin support
-- prompt/interactive authoring
-- full commitlint CLI compatibility
-
-## Verification
-
-The release-readiness replay path is:
-
-```bash
-task check
-task sync-preset
-git diff --exit-code
-go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'
-```
-
-Focused runtime regression coverage also includes benchmarks in [`internal/lint/lint_bench_test.go`](internal/lint/lint_bench_test.go) and fuzz coverage in [`internal/lint/fuzz_test.go`](internal/lint/fuzz_test.go).
+This project embeds data derived from commitlint packages. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
