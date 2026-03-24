@@ -154,6 +154,7 @@ func TestCompatConfigConventionalValidMessages(t *testing.T) {
 		"fix(scope): some message\n\nBREAKING CHANGE: it will be significant!",
 		"fix(scope): some message\n\nbody",
 		"fix(scope)!: some message\n\nbody",
+		"fix: issue\n\ndetailed explanation\n\nCloses: #123",
 	}
 
 	schema := loadCompatSchema(t)
@@ -1333,6 +1334,122 @@ func TestCompatRuleBoundaries(t *testing.T) {
 			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, []string{"camel-case"})},
 			wantFinding: true,
 		},
+
+		// footer-leading-blank: BREAKING-CHANGE (hyphenated) footer detection
+		{
+			name:        "footer-leading-blank/breaking-change-hyphen-missing",
+			origin:      "@commitlint/rules/src/footer-leading-blank.test.ts",
+			message:     "feat: subject\nBREAKING-CHANGE: desc",
+			ruleName:    preset.RuleFooterLeadingBlank,
+			rule:        preset.Rule{Level: 1, Applicable: preset.ApplicableAlways},
+			wantFinding: true,
+		},
+		{
+			name:        "footer-leading-blank/breaking-change-hyphen-present",
+			origin:      "@commitlint/rules/src/footer-leading-blank.test.ts",
+			message:     "feat: subject\n\nBREAKING-CHANGE: desc",
+			ruleName:    preset.RuleFooterLeadingBlank,
+			rule:        preset.Rule{Level: 1, Applicable: preset.ApplicableAlways},
+			wantFinding: false,
+		},
+
+		// footer-leading-blank: git trailers as footer
+		{
+			name:        "footer-leading-blank/signed-off-by-missing-blank",
+			origin:      "@commitlint/rules/src/signed-off-by.test.ts",
+			message:     "feat: subject\nSigned-off-by: Name <email>",
+			ruleName:    preset.RuleFooterLeadingBlank,
+			rule:        preset.Rule{Level: 1, Applicable: preset.ApplicableAlways},
+			wantFinding: true,
+		},
+		{
+			name:        "footer-leading-blank/signed-off-by-present",
+			origin:      "@commitlint/rules/src/signed-off-by.test.ts",
+			message:     "feat: subject\n\nSigned-off-by: Name <email>",
+			ruleName:    preset.RuleFooterLeadingBlank,
+			rule:        preset.Rule{Level: 1, Applicable: preset.ApplicableAlways},
+			wantFinding: false,
+		},
+		{
+			name:        "footer-leading-blank/co-authored-by",
+			origin:      "@commitlint/rules/src/trailer-exists.test.ts",
+			message:     "feat: subject\n\nCo-authored-by: Name <email>",
+			ruleName:    preset.RuleFooterLeadingBlank,
+			rule:        preset.Rule{Level: 1, Applicable: preset.ApplicableAlways},
+			wantFinding: false,
+		},
+
+		// body-max-line-length: Markdown URL patterns
+		{
+			name:        "body-max-line-length/markdown-list-url",
+			origin:      "@commitlint/rules/src/body-max-line-length.test.ts",
+			message:     "feat: sub\n\n- See https://example.com/very/long/path/that/exceeds/the/limit",
+			ruleName:    preset.RuleBodyMaxLineLength,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, 10)},
+			wantFinding: false,
+		},
+		{
+			name:        "body-max-line-length/markdown-footer-link-url",
+			origin:      "@commitlint/rules/src/body-max-line-length.test.ts",
+			message:     "feat: sub\n\n[1]: https://example.com/very/long/path/that/exceeds/the/limit",
+			ruleName:    preset.RuleBodyMaxLineLength,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, 10)},
+			wantFinding: false,
+		},
+
+		// subject-full-stop: non-period character
+		{
+			name:        "subject-full-stop/semicolon-never",
+			origin:      "@commitlint/rules/src/subject-full-stop.test.ts",
+			message:     "feat: subject;",
+			ruleName:    preset.RuleSubjectFullStop,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableNever, Value: rawJSON(t, ";")},
+			wantFinding: true,
+		},
+		{
+			name:        "subject-full-stop/semicolon-absent",
+			origin:      "@commitlint/rules/src/subject-full-stop.test.ts",
+			message:     "feat: subject",
+			ruleName:    preset.RuleSubjectFullStop,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableNever, Value: rawJSON(t, ";")},
+			wantFinding: false,
+		},
+
+		// body-max-line-length: emoji UTF-16 surrogate pair
+		{
+			name:        "body-max-line-length/emoji-utf16-at-limit",
+			origin:      "pommitlint: JS string.length compat (UTF-16 surrogate pair)",
+			message:     "feat: sub\n\n👍abcde",
+			ruleName:    preset.RuleBodyMaxLineLength,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, 7)},
+			wantFinding: false,
+		},
+		{
+			name:        "body-max-line-length/emoji-utf16-exceeds",
+			origin:      "pommitlint: JS string.length compat (UTF-16 surrogate pair)",
+			message:     "feat: sub\n\n👍abcdef",
+			ruleName:    preset.RuleBodyMaxLineLength,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, 7)},
+			wantFinding: true,
+		},
+
+		// subject-case: numeric subject with always applicable
+		{
+			name:        "subject-case/numeric-always-lower",
+			origin:      "@commitlint/rules/src/subject-case.test.ts",
+			message:     "feat: 1.0.0",
+			ruleName:    preset.RuleSubjectCase,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, []string{"lower-case"})},
+			wantFinding: false,
+		},
+		{
+			name:        "subject-case/numeric-always-upper",
+			origin:      "@commitlint/rules/src/subject-case.test.ts",
+			message:     "feat: 1.0.0",
+			ruleName:    preset.RuleSubjectCase,
+			rule:        preset.Rule{Level: 2, Applicable: preset.ApplicableAlways, Value: rawJSON(t, []string{"upper-case"})},
+			wantFinding: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -1405,6 +1522,46 @@ func TestCompatParseScopeAndFooterBehavior(t *testing.T) {
 			wantScope:       "",
 			wantBodyLines:   []string{"detailed explanation"},
 			wantFooterLines: []string{"Closes: #123"},
+		},
+		{
+			name:            "crlf-normalized",
+			origin:          "@commitlint/parse/src/index.test.ts",
+			message:         "type(scope): subject\r\n\r\nbody",
+			wantScope:       "scope",
+			wantBodyLines:   []string{"body"},
+			wantFooterLines: nil,
+		},
+		{
+			name:            "breaking-change-hyphen-as-footer",
+			origin:          "@commitlint/parse/src/index.test.ts",
+			message:         "feat: subject\n\nBREAKING-CHANGE: desc",
+			wantScope:       "",
+			wantBodyLines:   []string{},
+			wantFooterLines: []string{"BREAKING-CHANGE: desc"},
+		},
+		{
+			name:            "signed-off-by-as-footer",
+			origin:          "@commitlint/rules/src/signed-off-by.test.ts",
+			message:         "feat: subject\n\nbody\n\nSigned-off-by: Name <email>",
+			wantScope:       "",
+			wantBodyLines:   []string{"body"},
+			wantFooterLines: []string{"Signed-off-by: Name <email>"},
+		},
+		{
+			name:            "non-conventional-format",
+			origin:          "@commitlint/parse/src/index.test.ts",
+			message:         "hello world",
+			wantScope:       "",
+			wantBodyLines:   nil,
+			wantFooterLines: nil,
+		},
+		{
+			name:            "body-text-containing-breaking-change",
+			origin:          "@commitlint/parse/src/index.test.ts",
+			message:         "feat: sub\n\nbody with BREAKING CHANGE: in the middle\n\nBREAKING CHANGE: actual",
+			wantScope:       "",
+			wantBodyLines:   []string{"body with BREAKING CHANGE: in the middle"},
+			wantFooterLines: []string{"BREAKING CHANGE: actual"},
 		},
 	}
 
@@ -1584,6 +1741,25 @@ func TestCompatEmptyMessageLint(t *testing.T) {
 	rules := make(map[preset.RuleName]preset.Rule)
 	schema := compatSchemaForRules(t, rules)
 	result, err := lint.Lint("", "compat", &schema)
+	if err != nil {
+		t.Fatalf("Lint() error = %v", err)
+	}
+
+	if !result.Valid {
+		t.Fatalf("Valid = false, want true, findings = %#v", result.Findings)
+	}
+	if len(result.Findings) != 0 {
+		t.Fatalf("Findings = %#v, want empty", result.Findings)
+	}
+}
+
+func TestCompatNonEmptyMessageNoRules(t *testing.T) {
+	t.Parallel()
+
+	// origin: @commitlint/lint/src/lint.test.ts ("positive with no rules")
+	rules := make(map[preset.RuleName]preset.Rule)
+	schema := compatSchemaForRules(t, rules)
+	result, err := lint.Lint("feat: subject with body\n\nbody text", "compat", &schema)
 	if err != nil {
 		t.Fatalf("Lint() error = %v", err)
 	}
