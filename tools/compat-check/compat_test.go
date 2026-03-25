@@ -20,6 +20,12 @@ import (
 	"github.com/shuymn/pommitlint/internal/preset"
 )
 
+type cliJSONReport struct {
+	Source  string `json:"source"`
+	Valid   bool   `json:"valid"`
+	Ignored bool   `json:"ignored"`
+}
+
 func TestCompatDifferential(t *testing.T) {
 	t.Parallel()
 
@@ -29,7 +35,7 @@ func TestCompatDifferential(t *testing.T) {
 
 	clByID := indexByID(clResults)
 
-	var diffs []Diff
+	var diffs []comparisonDiff
 
 	for _, entry := range corpus {
 		if slices.Contains(entry.Tags, "ignored") || slices.Contains(entry.Tags, "not-ignored") {
@@ -48,7 +54,7 @@ func TestCompatDifferential(t *testing.T) {
 			continue
 		}
 
-		pl := toLintResult(entry.ID, result)
+		pl := tolintResult(entry.ID, result)
 
 		if diff := Compare(cl, pl, entry.Message); diff != nil {
 			diffs = append(diffs, *diff)
@@ -134,7 +140,7 @@ func loadCorpus(t *testing.T) []CorpusEntry {
 	return corpus
 }
 
-func runCommitlint(t *testing.T) []LintResult {
+func runCommitlint(t *testing.T) []lintResult {
 	t.Helper()
 
 	dir := toolDir()
@@ -151,7 +157,7 @@ func runCommitlint(t *testing.T) []LintResult {
 		t.Fatalf("bun lint-corpus.ts failed: %v\nstderr: %s", err, stderr.String())
 	}
 
-	var results []LintResult
+	var results []lintResult
 	if err := json.Unmarshal(output, &results); err != nil {
 		t.Fatalf("parse commitlint results: %v", err)
 	}
@@ -170,10 +176,10 @@ func loadSchema(t *testing.T) preset.Schema {
 	return schema
 }
 
-func toLintResult(id string, result lint.Result) LintResult {
-	findings := make([]FindingSummary, 0, len(result.Findings))
+func tolintResult(id string, result lint.Result) lintResult {
+	findings := make([]findingSummary, 0, len(result.Findings))
 	for _, f := range result.Findings {
-		findings = append(findings, FindingSummary{
+		findings = append(findings, findingSummary{
 			Rule:  string(f.Rule),
 			Level: string(f.Level),
 		})
@@ -181,7 +187,7 @@ func toLintResult(id string, result lint.Result) LintResult {
 
 	slices.SortFunc(findings, cmpFinding)
 
-	return LintResult{
+	return lintResult{
 		ID:       id,
 		Valid:    result.Valid,
 		Ignored:  result.Ignored,
@@ -207,7 +213,7 @@ func runPommitlintCLI(t *testing.T, message string) (ignored, valid bool) {
 		t.Fatalf("cli.Run unexpected error: %v", err)
 	}
 
-	var report cli.JSONReport
+	var report cliJSONReport
 	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
 		t.Fatalf("parse pommitlint CLI output: %v\nstdout: %s\nstderr: %s", err, stdout.String(), stderr.String())
 	}
@@ -215,15 +221,15 @@ func runPommitlintCLI(t *testing.T, message string) (ignored, valid bool) {
 	return report.Ignored, report.Valid
 }
 
-func indexByID(results []LintResult) map[string]LintResult {
-	m := make(map[string]LintResult, len(results))
+func indexByID(results []lintResult) map[string]lintResult {
+	m := make(map[string]lintResult, len(results))
 	for _, r := range results {
 		m[r.ID] = r
 	}
 	return m
 }
 
-func formatFindings(findings []FindingSummary) string {
+func formatFindings(findings []findingSummary) string {
 	parts := make([]string, len(findings))
 	for i, f := range findings {
 		parts[i] = f.Level + ":" + f.Rule

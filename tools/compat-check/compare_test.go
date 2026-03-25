@@ -9,17 +9,17 @@ import (
 func TestCompareIdentical(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{
+	cl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-enum", Level: "error"},
 		},
 	}
-	pl := LintResult{
+	pl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-enum", Level: "error"},
 		},
 	}
@@ -32,18 +32,18 @@ func TestCompareIdentical(t *testing.T) {
 func TestCompareIdenticalDifferentOrder(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{
+	cl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-case", Level: "error"},
 			{Rule: "type-enum", Level: "error"},
 		},
 	}
-	pl := LintResult{
+	pl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-enum", Level: "error"},
 			{Rule: "type-case", Level: "error"},
 		},
@@ -57,8 +57,8 @@ func TestCompareIdenticalDifferentOrder(t *testing.T) {
 func TestCompareValidMismatch(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{ID: "test", Valid: true}
-	pl := LintResult{ID: "test", Valid: false, Findings: []FindingSummary{
+	cl := lintResult{ID: "test", Valid: true}
+	pl := lintResult{ID: "test", Valid: false, Findings: []findingSummary{
 		{Rule: "type-enum", Level: "error"},
 	}}
 
@@ -75,18 +75,18 @@ func TestCompareValidMismatch(t *testing.T) {
 func TestCompareFindingMismatch(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{
+	cl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-enum", Level: "error"},
 			{Rule: "type-case", Level: "error"},
 		},
 	}
-	pl := LintResult{
+	pl := lintResult{
 		ID:    "test",
 		Valid: false,
-		Findings: []FindingSummary{
+		Findings: []findingSummary{
 			{Rule: "type-enum", Level: "error"},
 		},
 	}
@@ -96,7 +96,7 @@ func TestCompareFindingMismatch(t *testing.T) {
 		t.Fatal("expected diff, got nil")
 	}
 
-	wantOnlyCL := []FindingSummary{{Rule: "type-case", Level: "error"}}
+	wantOnlyCL := []findingSummary{{Rule: "type-case", Level: "error"}}
 	if d := cmp.Diff(wantOnlyCL, diff.OnlyCommitlint); d != "" {
 		t.Errorf("OnlyCommitlint mismatch (-want +got):\n%s", d)
 	}
@@ -109,8 +109,8 @@ func TestCompareFindingMismatch(t *testing.T) {
 func TestCompareIgnoredMismatch(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{ID: "test", Valid: true, Ignored: true}
-	pl := LintResult{ID: "test", Valid: true, Ignored: false}
+	cl := lintResult{ID: "test", Valid: true, Ignored: true}
+	pl := lintResult{ID: "test", Valid: true, Ignored: false}
 
 	diff := Compare(cl, pl, "Merge branch 'x'")
 	if diff == nil {
@@ -121,8 +121,8 @@ func TestCompareIgnoredMismatch(t *testing.T) {
 func TestCompareBothEmpty(t *testing.T) {
 	t.Parallel()
 
-	cl := LintResult{ID: "test", Valid: true}
-	pl := LintResult{ID: "test", Valid: true}
+	cl := lintResult{ID: "test", Valid: true}
+	pl := lintResult{ID: "test", Valid: true}
 
 	if diff := Compare(cl, pl, "feat: ok"); diff != nil {
 		t.Errorf("expected nil diff, got %+v", diff)
