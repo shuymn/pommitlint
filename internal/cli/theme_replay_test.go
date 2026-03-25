@@ -67,22 +67,22 @@ func TestEditMode(t *testing.T) {
 				t.Fatalf("outside exitCode = %d, want 0", resultFromOutside.exitCode)
 			}
 
-			var got cli.JSONReport
+			var got cli.ExportJSONReport
 			if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 				t.Fatalf("decode JSON report: %v", err)
 			}
-			var gotOutside cli.JSONReport
+			var gotOutside cli.ExportJSONReport
 			if err := json.Unmarshal([]byte(resultFromOutside.stdout), &gotOutside); err != nil {
 				t.Fatalf("decode outside JSON report: %v", err)
 			}
 
-			want := cli.JSONReport{
+			want := cli.ExportJSONReport{
 				Source:       "edit",
 				Valid:        true,
 				Ignored:      false,
 				ErrorCount:   0,
 				WarningCount: 0,
-				Findings:     []cli.JSONFinding{},
+				Findings:     []cli.ExportJSONFinding{},
 			}
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Fatalf("report mismatch (-want +got):\n%s", diff)
@@ -119,18 +119,18 @@ func TestIgnore(t *testing.T) {
 				t.Fatalf("exitCode = %d, want 0", result.exitCode)
 			}
 
-			var got cli.JSONReport
+			var got cli.ExportJSONReport
 			if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 				t.Fatalf("decode JSON report: %v", err)
 			}
 
-			want := cli.JSONReport{
+			want := cli.ExportJSONReport{
 				Source:       "message",
 				Valid:        true,
 				Ignored:      true,
 				ErrorCount:   0,
 				WarningCount: 0,
-				Findings:     []cli.JSONFinding{},
+				Findings:     []cli.ExportJSONFinding{},
 			}
 			if diff := cmp.Diff(want, got); diff != "" {
 				t.Fatalf("report mismatch (-want +got):\n%s", diff)
@@ -155,7 +155,7 @@ func TestIgnoreOptOut(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 1", result.exitCode)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}

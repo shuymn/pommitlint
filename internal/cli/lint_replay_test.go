@@ -56,17 +56,17 @@ func TestCLIMessageReplay(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 0", result.exitCode)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}
 
-	want := cli.JSONReport{
+	want := cli.ExportJSONReport{
 		Source:       "message",
 		Valid:        true,
 		ErrorCount:   0,
 		WarningCount: 0,
-		Findings:     []cli.JSONFinding{},
+		Findings:     []cli.ExportJSONFinding{},
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Fatalf("report mismatch (-want +got):\n%s", diff)
@@ -92,17 +92,17 @@ func TestCLIEditReplay(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 1", result.exitCode)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}
 
-	want := cli.JSONReport{
+	want := cli.ExportJSONReport{
 		Source:       "edit",
 		Valid:        false,
 		ErrorCount:   1,
 		WarningCount: 0,
-		Findings: []cli.JSONFinding{
+		Findings: []cli.ExportJSONFinding{
 			{
 				Rule:    "subject-case",
 				Level:   "error",
@@ -135,7 +135,7 @@ func TestCLIFileReplay(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 0", result.exitCode)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestCLIFileReplay(t *testing.T) {
 		t.Fatal("Findings is empty, expected at least one finding")
 	}
 
-	if diff := cmp.Diff(cli.JSONFinding{
+	if diff := cmp.Diff(cli.ExportJSONFinding{
 		Rule:    "body-leading-blank",
 		Level:   "warning",
 		Field:   "body",

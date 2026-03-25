@@ -1,6 +1,7 @@
 # Binary
 /pommitlint
 /sync-preset
+/compat-check
 
 # Test coverage
 /coverage.out

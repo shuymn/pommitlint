@@ -341,7 +341,7 @@ func TestCompatDefaultIgnores(t *testing.T) {
 				t.Fatalf("%s: exitCode mismatch (-want +got):\n%s\nstdout=%q\nstderr=%q", tt.origin, diff, result.stdout, result.stderr)
 			}
 
-			var got cli.JSONReport
+			var got cli.ExportJSONReport
 			if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 				t.Fatalf("%s: decode JSON report: %v", tt.origin, err)
 			}
@@ -423,7 +423,7 @@ func TestCompatEditSanitizeCommentsAndScissors(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 0, stdout=%q, stderr=%q", result.exitCode, result.stdout, result.stderr)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}
@@ -436,7 +436,7 @@ func TestCompatEditSanitizeCommentsAndScissors(t *testing.T) {
 	}
 }
 
-func runEditDefaultCompat(t *testing.T, workDir string) cli.JSONReport {
+func runEditDefaultCompat(t *testing.T, workDir string) cli.ExportJSONReport {
 	t.Helper()
 
 	result := runCommand(t, &commandInput{
@@ -448,7 +448,7 @@ func runEditDefaultCompat(t *testing.T, workDir string) cli.JSONReport {
 		t.Fatalf("exitCode = %d, want 0, stdout=%q, stderr=%q", result.exitCode, result.stdout, result.stderr)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}
@@ -477,7 +477,7 @@ func TestCompatEditUsesCoreCommentChar(t *testing.T) {
 		t.Fatalf("exitCode = %d, want 0, stdout=%q, stderr=%q", result.exitCode, result.stdout, result.stderr)
 	}
 
-	var got cli.JSONReport
+	var got cli.ExportJSONReport
 	if err := json.Unmarshal([]byte(result.stdout), &got); err != nil {
 		t.Fatalf("decode JSON report: %v", err)
 	}

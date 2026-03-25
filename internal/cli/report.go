@@ -8,17 +8,17 @@ import (
 )
 
 func writeJSONReport(writer io.Writer, result *lint.Result) error {
-	report := JSONReport{
+	report := jsonReport{
 		Source:       result.Source,
 		Valid:        result.Valid,
 		Ignored:      result.Ignored,
 		ErrorCount:   result.ErrorCount(),
 		WarningCount: result.WarningCount(),
-		Findings:     make([]JSONFinding, 0, len(result.Findings)),
+		Findings:     make([]jsonFinding, 0, len(result.Findings)),
 	}
 
 	for _, finding := range result.Findings {
-		report.Findings = append(report.Findings, JSONFinding{
+		report.Findings = append(report.Findings, jsonFinding{
 			Rule:    string(finding.Rule),
 			Level:   string(finding.Level),
 			Field:   finding.Field,

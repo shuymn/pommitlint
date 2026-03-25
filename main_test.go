@@ -5,9 +5,12 @@ import (
 	"errors"
 	"os/exec"
 	"testing"
-
-	"github.com/shuymn/pommitlint/internal/cli"
 )
+
+type jsonReportResult struct {
+	Source string `json:"source"`
+	Valid  bool   `json:"valid"`
+}
 
 func TestBinaryArgsReplay(t *testing.T) {
 	command := exec.CommandContext(
@@ -32,7 +35,7 @@ func TestBinaryArgsReplay(t *testing.T) {
 		t.Fatalf("go run lint: %v", err)
 	}
 
-	var report cli.JSONReport
+	var report jsonReportResult
 	if err := json.Unmarshal(output, &report); err != nil {
 		t.Fatalf("decode report: %v", err)
 	}

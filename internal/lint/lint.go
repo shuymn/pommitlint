@@ -56,7 +56,7 @@ type Message struct {
 	Subject            string
 }
 
-func Parse(raw string, schema *preset.Schema) (Message, error) {
+func parse(raw string, schema *preset.Schema) (Message, error) {
 	normalized := strings.ReplaceAll(raw, "\r\n", "\n")
 	normalized = strings.TrimRight(normalized, "\n")
 	if normalized == "" {
@@ -122,7 +122,7 @@ func enrichHeader(message *Message, schema *preset.Schema) error {
 }
 
 func Lint(raw, source string, schema *preset.Schema) (Result, error) {
-	message, err := Parse(raw, schema)
+	message, err := parse(raw, schema)
 	if err != nil {
 		return Result{}, err
 	}

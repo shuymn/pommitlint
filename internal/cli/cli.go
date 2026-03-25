@@ -28,16 +28,16 @@ type Options struct {
 	WorkDir string
 }
 
-type JSONReport struct {
+type jsonReport struct {
 	Source       string        `json:"source"`
 	Valid        bool          `json:"valid"`
 	Ignored      bool          `json:"ignored"`
 	ErrorCount   int           `json:"errorCount"`
 	WarningCount int           `json:"warningCount"`
-	Findings     []JSONFinding `json:"findings"`
+	Findings     []jsonFinding `json:"findings"`
 }
 
-type JSONFinding struct {
+type jsonFinding struct {
 	Rule    string `json:"rule"`
 	Level   string `json:"level"`
 	Field   string `json:"field"`
