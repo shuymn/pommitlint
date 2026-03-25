@@ -1,4 +1,4 @@
-name: Validate Renovate config
+name: Renovate
 
 on:
   push:

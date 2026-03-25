@@ -1,4 +1,4 @@
-name: Security checks
+name: Security
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  security:
+  scan:
     permissions:
       contents: read
       pull-requests: write

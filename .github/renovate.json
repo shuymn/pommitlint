@@ -2,6 +2,22 @@
   "extends": [
     "github>shuymn/github-actions#main"
   ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
+      "groupName": "commitlint"
+    },
+    {
+      "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["renovate:major"]
+    },
+    {
+      "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["renovate:minor"]
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
@@ -13,6 +29,17 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "golangci/golangci-lint"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        ".github/workflows/release.yml"
+      ],
+      "matchStrings": [
+        "GO_LICENSES_VERSION: (?<currentValue>v?\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "google/go-licenses"
     }
   ]
 }
