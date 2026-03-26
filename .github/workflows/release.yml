@@ -5,7 +5,7 @@ on:
       - "v*"
 
 env:
-  GO_LICENSES_VERSION: v1.6.0
+  GO_LICENSES_VERSION: v2.0.1
 
 jobs:
   publish:
