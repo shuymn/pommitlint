@@ -5,6 +5,8 @@ Single-binary commit message linter compatible with [`@commitlint/config-convent
 ## Install
 
 ```bash
+brew install shuymn/tap/pommitlint
+# or
 go install github.com/shuymn/pommitlint@latest
 ```
 
