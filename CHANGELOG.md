@@ -1,5 +1,8 @@
 # Changelog
 
+## [v1.1.2](https://github.com/shuymn/pommitlint/compare/v1.1.1...v1.1.2) - 2026-03-28
+- fix(ci): use v2 module path for go-licenses by @shuymn in https://github.com/shuymn/pommitlint/pull/14
+
 ## [v1.1.1](https://github.com/shuymn/pommitlint/compare/v1.1.0...v1.1.1) - 2026-03-26
 - chore(deps): update dependency google/go-licenses to v2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/9
 - chore(deps): update dependency golangci/golangci-lint to v2.11.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/2
