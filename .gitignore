@@ -29,3 +29,6 @@
 
 # Bun install output
 node_modules/
+
+# Claude Code
+/.claude/
