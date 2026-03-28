@@ -1,5 +1,7 @@
 # Changelog
 
+## [v1.1.3](https://github.com/shuymn/pommitlint/compare/v1.1.2...v1.1.3) - 2026-03-28
+
 ## [v1.1.2](https://github.com/shuymn/pommitlint/compare/v1.1.1...v1.1.2) - 2026-03-28
 - fix(ci): use v2 module path for go-licenses by @shuymn in https://github.com/shuymn/pommitlint/pull/14
 
