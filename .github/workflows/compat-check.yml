@@ -42,7 +42,7 @@ jobs:
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
       - name: Set up Task
-        uses: shuymn/github-actions/.github/actions/setup-task@65cae648d29f14837e0fbce3dcdbd13a52d101c0
+        uses: shuymn/github-actions/.github/actions/setup-task@47a0ccf882b365a190001c737ad38eeecaaae17a
 
       - name: Run compatibility check
         run: task compat-check
