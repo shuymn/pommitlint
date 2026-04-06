@@ -29,7 +29,7 @@ jobs:
           cache: true
 
       - name: Set up Task
-        uses: shuymn/github-actions/.github/actions/setup-task@d8412a4b21644ba991687022914c99984b1e82f8
+        uses: shuymn/github-actions/.github/actions/setup-task@eead2bf6ec64083e01cb2fb7b5f8239e48e372a9
 
       - name: Check Go module files
         run: |
@@ -69,7 +69,7 @@ jobs:
           cache: true
 
       - name: Set up Task
-        uses: shuymn/github-actions/.github/actions/setup-task@d8412a4b21644ba991687022914c99984b1e82f8
+        uses: shuymn/github-actions/.github/actions/setup-task@eead2bf6ec64083e01cb2fb7b5f8239e48e372a9
 
       - name: Run tests
         run: task test
@@ -95,7 +95,7 @@ jobs:
           cache: true
 
       - name: Set up Task
-        uses: shuymn/github-actions/.github/actions/setup-task@d8412a4b21644ba991687022914c99984b1e82f8
+        uses: shuymn/github-actions/.github/actions/setup-task@eead2bf6ec64083e01cb2fb7b5f8239e48e372a9
 
       - name: Build binary
         run: task build
