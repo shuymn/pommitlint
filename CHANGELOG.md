@@ -1,5 +1,9 @@
 # Changelog
 
+## [v2.0.0](https://github.com/shuymn/pommitlint/compare/v1.1.3...v2.0.0) - 2026-05-11
+- chore(deps): update dependency golangci/golangci-lint to v2.12.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/45
+- fix(deps): update commitlint to v21 (major) by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/46
+
 ## [v1.1.3](https://github.com/shuymn/pommitlint/compare/v1.1.2...v1.1.3) - 2026-05-05
 - chore(deps): update actions/setup-go action to v6.4.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/20
 - chore(deps): update shuymn/github-actions digest to ac04e25 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/18
