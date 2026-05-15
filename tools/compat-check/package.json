@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@commitlint/config-conventional": "21.0.0",
-    "@commitlint/is-ignored": "21.0.0",
-    "@commitlint/lint": "21.0.0",
+    "@commitlint/config-conventional": "21.0.1",
+    "@commitlint/is-ignored": "21.0.1",
+    "@commitlint/lint": "21.0.1",
     "conventional-changelog-conventionalcommits": "9.3.1"
   }
 }
