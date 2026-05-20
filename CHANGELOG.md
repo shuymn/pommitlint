@@ -1,5 +1,12 @@
 # Changelog
 
+## [v2.0.1](https://github.com/shuymn/pommitlint/compare/v2.0.0...v2.0.1) - 2026-05-20
+- chore(deps): update go toolchain directive to v1.26.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/49
+- fix(deps): update commitlint to v21.0.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/51
+- chore(deps): update songmu/tagpr action to v1.19.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/52
+- chore(deps): update dependency golangci/golangci-lint to v2.12.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/48
+- chore(deps): lock file maintenance by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/43
+
 ## [v2.0.0](https://github.com/shuymn/pommitlint/compare/v1.1.3...v2.0.0) - 2026-05-11
 - chore(deps): update dependency golangci/golangci-lint to v2.12.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/45
 - fix(deps): update commitlint to v21 (major) by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/46
