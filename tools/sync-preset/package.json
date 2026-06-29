@@ -4,6 +4,6 @@
   "type": "module",
   "dependencies": {
     "@commitlint/config-conventional": "21.1.0",
-    "conventional-changelog-conventionalcommits": "9.3.1"
+    "conventional-changelog-conventionalcommits": "10.0.0"
   }
 }
