@@ -6,6 +6,6 @@
     "@commitlint/config-conventional": "21.1.0",
     "@commitlint/is-ignored": "21.1.0",
     "@commitlint/lint": "21.1.0",
-    "conventional-changelog-conventionalcommits": "9.3.1"
+    "conventional-changelog-conventionalcommits": "10.0.0"
   }
 }
