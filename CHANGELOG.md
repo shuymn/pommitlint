@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.0.2](https://github.com/shuymn/pommitlint/compare/v2.0.1...v2.0.2) - 2026-09-04
+
+- chore(deps): update actions/create-github-app-token action to v3.2.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/53
+- chore(deps): update goreleaser/goreleaser-action action to v7.2.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/56
+- chore(deps): update golangci/golangci-lint-action action to v9.2.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/57
+- fix(deps): update commitlint to v21.0.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/58
+- chore(deps): update songmu/tagpr action to v1.20.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/59
+- chore(deps): update actions/checkout action to v6.0.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/60
+- chore(deps): update go toolchain directive to v1.26.4 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/62
+- fix(deps): update commitlint to v21.1.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/64
+- chore(deps): update actions/setup-go action to v6.5.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/65
+- chore(deps): update goreleaser/goreleaser-action action to v7.2.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/67
+- chore(deps): update golangci/golangci-lint-action action to v9.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/68
+- fix(deps): update commitlint to v21.2.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/69
+- chore(deps): update go toolchain directive to v1.26.5 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/70
+- chore(deps): update songmu/tagpr action to v1.20.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/71
+- chore(deps): update actions/checkout action to v6.1.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/73
+- chore(deps): update go toolchain directive to v1.26.6 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/74
+- fix(deps): update commitlint to v21.2.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/75
+- chore(deps): update go toolchain directive to v1.26.7 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/76
+- chore(deps): update go toolchain directive to v1.27.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/77
+- chore(deps): update dependency golangci/golangci-lint to v2.13.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/78
+- chore(deps): update dependency golangci/golangci-lint to v2.13.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/79
+- chore(deps): update songmu/tagpr action to v1.20.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/80
+- chore(deps): update dependency golangci/golangci-lint to v2.13.2 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/81
+- chore(deps): update go toolchain directive to v1.27.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/82
+
 ## [v2.0.1](https://github.com/shuymn/pommitlint/compare/v2.0.0...v2.0.1) - 2026-05-20
 - chore(deps): update go toolchain directive to v1.26.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/49
 - fix(deps): update commitlint to v21.0.1 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/51
