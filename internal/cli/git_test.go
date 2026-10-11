@@ -1,6 +1,7 @@
 package cli_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -8,6 +9,21 @@ import (
 	"strings"
 	"testing"
 )
+
+// In-process CLI tests also spawn Git, so clear hook context before any parallel
+// tests start. Subprocess fixtures still isolate their environment independently.
+func TestMain(m *testing.M) {
+	for _, entry := range os.Environ() {
+		key, _, _ := strings.Cut(entry, "=")
+		if strings.HasPrefix(key, "GIT_") {
+			if err := os.Unsetenv(key); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+		}
+	}
+	os.Exit(m.Run())
+}
 
 type isolatedGitRepo struct {
 	rootDir string
