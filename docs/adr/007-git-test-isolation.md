@@ -27,6 +27,7 @@ Required isolation rules:
 
 - Use `t.TempDir()` to create a dedicated repository root, HOME-like directory, hooks directory, and GNUPGHOME.
 - Never run Git-mutating test commands in the real repository.
+- Remove inherited `GIT_*` variables before setting fixture defaults. Hooks export repository context such as `GIT_COMMON_DIR`; retaining it can make fixture commands mutate the real repository even with an isolated HOME.
 - Set Git process environment for test subprocesses to ignore ambient config:
   - `HOME=<temp-home>`
   - `XDG_CONFIG_HOME=<temp-xdg>`

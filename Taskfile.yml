@@ -23,6 +23,27 @@ tasks:
     cmds:
       - task --list
 
+  infra:validate:
+    desc: Validate the declarative GitHub repository settings
+    cmds:
+      - gh-infra validate .github/infra.yaml
+
+  infra:plan:
+    desc: Compare declared GitHub settings with live state (read-only)
+    cmds:
+      - gh-infra plan .github/infra.yaml
+
+  infra:apply:
+    desc: Apply declared GitHub settings after reviewing the plan
+    summary: |
+      Requires gh-infra and gh authentication with repository administration access.
+      Mutates shuymn/pommitlint settings; requires explicit authorization.
+      First deploy the Release checks CI job and verify it succeeds on main.
+      Run task infra:plan before applying. Confirmation is interactive by default.
+      For an already-approved noninteractive apply, use -- --auto-approve.
+    cmds:
+      - gh-infra apply .github/infra.yaml {{range .CLI_ARGS_LIST}}{{shellQuote .}} {{end}}
+
   build:
     desc: Build the main binary
     summary: |
@@ -94,6 +115,12 @@ tasks:
       Uses shuffle=on and count=10 for stronger signal during local verification.
     cmds:
       - go test -race -shuffle=on -count=10 ./...
+
+  test:release:
+    desc: Test release eligibility and publication guards without GitHub writes
+    cmds:
+      - bash tools/release/auto-patch_test.sh
+      - bash tools/release/check-publish_test.sh
 
   test:coverage:
     desc: Run tests with coverage output
@@ -275,4 +302,5 @@ tasks:
       - task: fmt:check:ts
       - task: build:check
       - task: test
+      - task: test:release
       - task: tidy
