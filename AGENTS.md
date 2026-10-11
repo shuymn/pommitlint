@@ -15,6 +15,11 @@
 - When asked to commit without a specific format, follow Conventional Commits: `<type>(<scope>): <imperative summary>`
 - Never use `--no-verify` when committing or pushing; fix the underlying hook failure instead
 
+## GitHub Repository Settings
+
+- Manage repository settings declaratively in `.github/infra.yaml` with gh-infra via the `infra:*` tasks.
+- Before changing rulesets or activating automatic releases, read [ADR-010](docs/adr/010-behavior-aware-releases.md) for rollout order and verification.
+
 ## Documentation Scope
 
 - Keep these instruction files limited to always-on repository rules.

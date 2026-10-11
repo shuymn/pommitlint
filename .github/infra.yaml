@@ -1,0 +1,125 @@
+apiVersion: gh-infra/v1
+kind: Repository
+metadata:
+  name: pommitlint
+  owner: shuymn
+reconcile:
+  rulesets: authoritative
+  # tagpr can create release-control labels; do not delete undeclared labels.
+  labels: additive
+spec:
+  description: Single-binary commit message linter compatible with @commitlint/config-conventional. No Node.js required.
+  visibility: public
+  archived: false
+  topics:
+  - commit-lint
+  - commitlint
+  - conventional-commits
+  - git-hooks
+  - golang
+  - linter
+  labels:
+  - name: bug
+    description: Something isn't working
+    color: d73a4a
+  - name: dependencies
+    color: ededed
+  - name: documentation
+    description: Improvements or additions to documentation
+    color: 0075ca
+  - name: duplicate
+    description: This issue or pull request already exists
+    color: cfd3d7
+  - name: enhancement
+    description: New feature or request
+    color: a2eeef
+  - name: good first issue
+    description: Good for newcomers
+    color: 7057ff
+  - name: help wanted
+    description: Extra attention is needed
+    color: 008672
+  - name: invalid
+    description: This doesn't seem right
+    color: e4e669
+  - name: major
+    description: Trigger major version bump via tagpr
+    color: D93F0B
+  - name: minor
+    description: Trigger minor version bump via tagpr
+    color: 5319E7
+  - name: question
+    description: Further information is requested
+    color: d876e3
+  - name: renovate:major
+    color: ededed
+  - name: renovate:minor
+    color: ededed
+  - name: tagpr
+    color: ededed
+  - name: wontfix
+    description: This will not be worked on
+    color: ffffff
+  features:
+    issues: true
+    projects: false
+    wiki: false
+    discussions: false
+    pull_requests: true
+  merge_strategy:
+    allow_merge_commit: true
+    allow_squash_merge: false
+    allow_rebase_merge: false
+    allow_auto_merge: true
+    auto_delete_head_branches: true
+    squash_merge_commit_title: COMMIT_OR_PR_TITLE
+    squash_merge_commit_message: COMMIT_MESSAGES
+    merge_commit_title: MERGE_MESSAGE
+    merge_commit_message: PR_TITLE
+  release_immutability: true
+  security:
+    vulnerability_alerts: false
+    automated_security_fixes: false
+    private_vulnerability_reporting: false
+  rulesets:
+  - name: Default
+    target: branch
+    enforcement: active
+    bypass_actors:
+    - role: admin
+      bypass_mode: always
+    conditions:
+      ref_name:
+        include:
+        - ~DEFAULT_BRANCH
+    rules:
+      non_fast_forward: true
+      update: false
+      deletion: true
+      creation: false
+      required_linear_history: false
+      required_signatures: true
+      required_status_checks:
+        strict_required_status_checks_policy: true
+        contexts:
+        - context: Release checks
+          app: github-actions
+  variables:
+  - name: APP_ID
+    value: "3178124"
+  actions:
+    enabled: true
+    allowed_actions: selected
+    sha_pinning_required: true
+    workflow_permissions: read
+    can_approve_pull_requests: false
+    selected_actions:
+      github_owned_allowed: true
+      verified_allowed: false
+      patterns_allowed:
+      - gitleaks/gitleaks-action@*
+      - golangci/golangci-lint-action@*
+      - oven-sh/setup-bun@*
+      - goreleaser/goreleaser-action@*
+      - Songmu/tagpr@*
+    fork_pr_approval: first_time_contributors
