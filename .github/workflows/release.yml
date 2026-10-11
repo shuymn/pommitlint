@@ -4,35 +4,51 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
 env:
   GO_LICENSES_VERSION: v2.0.1
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: write
-      id-token: write
-      attestations: write
+      actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Check publication eligibility
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: bash tools/release/check-publish.sh
+
       - name: Set up Go
+        if: steps.guard.outputs.publish == 'true'
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
           cache: true
 
       - name: Generate third-party licenses
+        if: steps.guard.outputs.publish == 'true'
         run: |
-          go install github.com/google/go-licenses/v2@${{ env.GO_LICENSES_VERSION }}
+          go install "github.com/google/go-licenses/v2@${GO_LICENSES_VERSION:?}"
           go-licenses save ./... --save_path=third_party_licenses --force
 
       - name: Run GoReleaser
+        if: steps.guard.outputs.publish == 'true'
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
@@ -42,7 +58,18 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Publish draft release
+        if: steps.guard.outputs.publish == 'true'
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          MAKE_LATEST: ${{ steps.guard.outputs.latest }}
+          GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit "$RELEASE_TAG" --draft=false
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if gh release edit "$RELEASE_TAG" --draft=false --latest="$MAKE_LATEST"; then
+              exit 0
+            fi
+            if (( attempt < 5 )); then sleep "$((attempt * 5))"; fi
+          done
+          echo "failed to publish release after retries" >&2
+          exit 1

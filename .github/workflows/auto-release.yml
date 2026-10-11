@@ -1,0 +1,88 @@
+name: Auto release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    if: >-
+      github.repository == 'shuymn/pommitlint' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_branch, 'tagpr-from-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # workflow_run is privileged: execute only trusted main code, never PR code
+      # or artifacts from the triggering run. The PR tree is inspected via git show.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check automatic patch eligibility
+        id: eligible
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          published=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name' |
+            jq -Rrsc 'split("\n") | map(select(test("^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"))) | sort_by(.[1:] | split(".") | map([length, .])) | last // empty')
+          [[ -n "$published" && "$HEAD_BRANCH" == "tagpr-from-$published" ]] || exit 0
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&head=${GITHUB_REPOSITORY_OWNER}:${HEAD_BRANCH}" \
+            --jq '.[] | select(.user.login == "pommitlint-maintainer[bot]" and .draft == false) | .number')
+          [[ "$pr" =~ ^[0-9]+$ ]] || exit 0
+          pull=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr")
+          head=$(jq -r '.head.sha' <<< "$pull")
+          [[ "$head" == "$TESTED_SHA" ]] || exit 0
+          # Respect an explicit version choice even before tagpr refreshes VERSION.
+          jq -e 'all(.labels[]; .name | test("^tagpr[:/](major|minor)$") | not)' <<< "$pull" >/dev/null || exit 0
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/pulls/$pr/files?per_page=100" |
+            jq -e 'flatten | all(.status == "modified" and (.filename == "VERSION" or .filename == "CHANGELOG.md"))' >/dev/null
+          git fetch origin "refs/pull/$pr/head:refs/remotes/origin/release-pr"
+          [[ "$(git rev-parse origin/release-pr)" == "$head" ]] || exit 0
+          git merge-base --is-ancestor origin/main "$head" || exit 0
+          eligible=$(bash tools/release/auto-patch.sh "$published" "$head")
+          [[ "$eligible" == true ]] || exit 0
+
+          # A SHA guard alone cannot guard a concurrently advancing base branch.
+          # Require GitHub to reject merges whose tested base has become stale.
+          rules=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/main")
+          if ! jq -e 'any(.[]; .type == "required_status_checks" and .parameters.strict_required_status_checks_policy == true and any(.parameters.required_status_checks[]; .context == "Release checks" and .integration_id == 15368))' <<< "$rules" >/dev/null; then
+            echo "Auto release is disabled: require strict Release checks from GitHub Actions on main." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        if: steps.eligible.outputs.number != ''
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Merge the tested release PR
+        if: steps.eligible.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_NUMBER: ${{ steps.eligible.outputs.number }}
+          EXPECTED_HEAD: ${{ steps.eligible.outputs.head }}
+        run: gh pr merge "$PR_NUMBER" --merge --match-head-commit "$EXPECTED_HEAD"

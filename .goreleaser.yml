@@ -5,7 +5,7 @@ project_name: pommitlint
 
 before:
   hooks:
-    - go mod tidy
+    - go mod download
 
 builds:
   - id: pommitlint
@@ -41,3 +41,7 @@ changelog:
 
 release:
   draft: true
+  name_template: "{{ .Tag }}"
+  use_existing_draft: true
+  replace_existing_artifacts: true
+  mode: keep-existing

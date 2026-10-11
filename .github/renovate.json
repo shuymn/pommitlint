@@ -6,16 +6,6 @@
     {
       "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
       "groupName": "commitlint"
-    },
-    {
-      "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
-      "matchUpdateTypes": ["major"],
-      "addLabels": ["renovate:major"]
-    },
-    {
-      "matchPackageNames": ["/^@commitlint//", "/^conventional-changelog-/"],
-      "matchUpdateTypes": ["minor"],
-      "addLabels": ["renovate:minor"]
     }
   ],
   "customManagers": [

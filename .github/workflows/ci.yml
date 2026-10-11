@@ -72,7 +72,9 @@ jobs:
         uses: shuymn/github-actions/.github/actions/setup-task@e3d3485d66cf3fe598d8954fff89e81c5cac57e0
 
       - name: Run tests
-        run: task test
+        run: |
+          task test
+          task test:release
 
   build:
     name: Build
@@ -99,3 +101,39 @@ jobs:
 
       - name: Build binary
         run: task build
+
+  compatibility:
+    name: Compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - uses: shuymn/github-actions/.github/actions/setup-task@e3d3485d66cf3fe598d8954fff89e81c5cac57e0
+      - name: Verify the embedded preset and compatibility target
+        run: |
+          task sync-preset
+          git diff --exit-code -- internal/preset/preset.json
+          task compat-check
+
+  release-checks:
+    name: Release checks
+    if: always()
+    needs: [build, compatibility]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    permissions:
+      contents: read
+    steps:
+      - name: Require every prerequisite to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: jq -e 'all(.[]; .result == "success")' <<< "$RESULTS"

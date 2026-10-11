@@ -95,6 +95,12 @@ tasks:
     cmds:
       - go test -race -shuffle=on -count=10 ./...
 
+  test:release:
+    desc: Test release eligibility and publication guards without GitHub writes
+    cmds:
+      - bash tools/release/auto-patch_test.sh
+      - bash tools/release/check-publish_test.sh
+
   test:coverage:
     desc: Run tests with coverage output
     summary: |
@@ -275,4 +281,5 @@ tasks:
       - task: fmt:check:ts
       - task: build:check
       - task: test
+      - task: test:release
       - task: tidy
