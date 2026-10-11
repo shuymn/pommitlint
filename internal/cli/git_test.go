@@ -4,12 +4,46 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 )
 
 type isolatedGitRepo struct {
 	rootDir string
 	env     []string
+}
+
+func TestIsolatedGitRepoIgnoresHookEnvironment(t *testing.T) {
+	foreignDir := t.TempDir()
+	foreignConfig := filepath.Join(foreignDir, "config")
+	const originalConfig = "[core]\n\tbare = true\n"
+	if err := os.WriteFile(foreignConfig, []byte(originalConfig), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// Git exports repository context to hooks; it must not escape into fixtures.
+	t.Setenv("GIT_COMMON_DIR", foreignDir)
+	t.Setenv("GIT_DIR", foreignDir)
+	t.Setenv("GIT_WORK_TREE", t.TempDir())
+	t.Setenv("GIT_CONFIG_COUNT", "1")
+	t.Setenv("GIT_CONFIG_KEY_0", "core.commentChar")
+	t.Setenv("GIT_CONFIG_VALUE_0", ";")
+
+	repo := newIsolatedGitRepo(t)
+	if _, err := os.Stat(filepath.Join(repo.rootDir, ".git", "config")); err != nil {
+		t.Fatalf("fixture did not initialize its own repository: %v", err)
+	}
+	got, err := os.ReadFile(foreignConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != originalConfig {
+		t.Fatalf("fixture modified the inherited repository config: %s", got)
+	}
+	if config := repo.git(t, "config", "--list"); strings.Contains(config, "core.commentchar=") {
+		t.Fatalf("fixture inherited command-line config: %s", config)
+	}
 }
 
 func newIsolatedGitRepo(t *testing.T) isolatedGitRepo {
@@ -27,9 +61,14 @@ func newIsolatedGitRepo(t *testing.T) isolatedGitRepo {
 		}
 	}
 
+	// Ignore hook-exported repository paths and injected config before setting
+	// the fixture defaults. HOME isolation alone cannot override these values.
+	env := slices.DeleteFunc(os.Environ(), func(entry string) bool {
+		return strings.HasPrefix(entry, "GIT_")
+	})
 	repo := isolatedGitRepo{
 		rootDir: rootDir,
-		env: append(os.Environ(),
+		env: append(env,
 			"HOME="+homeDir,
 			"XDG_CONFIG_HOME="+xdgDir,
 			"GNUPGHOME="+gnupgDir,
