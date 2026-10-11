@@ -1,5 +1,10 @@
 # Changelog
 
+## [v2.0.3](https://github.com/shuymn/pommitlint/compare/v2.0.2...v2.0.3) - 2026-10-11
+
+- chore(deps): lock file maintenance by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/55
+- fix(deps): update dependency conventional-changelog-conventionalcommits to v10 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/66
+
 ## [v2.0.2](https://github.com/shuymn/pommitlint/compare/v2.0.1...v2.0.2) - 2026-10-11
 
 - chore(deps): update actions/create-github-app-token action to v3.2.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/53
