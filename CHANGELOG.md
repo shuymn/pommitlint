@@ -1,5 +1,10 @@
 # Changelog
 
+## [v2.0.4](https://github.com/shuymn/pommitlint/compare/v2.0.3...v2.0.4) - 2026-10-16
+
+- chore(deps): update goreleaser/goreleaser-action action to v7.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/93
+- chore(deps): update actions/create-github-app-token action to v3.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/95
+
 ## [v2.0.3](https://github.com/shuymn/pommitlint/compare/v2.0.2...v2.0.3) - 2026-10-11
 
 - chore(deps): lock file maintenance by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/55
