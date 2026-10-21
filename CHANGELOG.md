@@ -1,5 +1,12 @@
 # Changelog
 
+## [v2.0.4](https://github.com/shuymn/pommitlint/compare/v2.0.3...v2.0.4) - 2026-10-21
+
+- chore(deps): update goreleaser/goreleaser-action action to v7.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/93
+- chore(deps): update actions/create-github-app-token action to v3.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/95
+- chore(deps): update songmu/tagpr action to v1.21.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/96
+- fix(deps): update commitlint to v21.2.4 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/98
+
 ## [v2.0.3](https://github.com/shuymn/pommitlint/compare/v2.0.2...v2.0.3) - 2026-10-11
 
 - chore(deps): lock file maintenance by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/55
