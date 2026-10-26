@@ -1,5 +1,10 @@
 # Changelog
 
+## [v2.0.5](https://github.com/shuymn/pommitlint/compare/v2.0.4...v2.0.5) - 2026-10-26
+
+- chore(deps): update go toolchain directive to v1.27.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/99
+- chore(deps): update songmu/tagpr action to v1.21.4 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/101
+
 ## [v2.0.4](https://github.com/shuymn/pommitlint/compare/v2.0.3...v2.0.4) - 2026-10-21
 
 - chore(deps): update goreleaser/goreleaser-action action to v7.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/93
