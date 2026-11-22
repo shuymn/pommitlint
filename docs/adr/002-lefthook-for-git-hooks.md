@@ -20,7 +20,7 @@ Use Lefthook for git hook management.
 Reasons:
 
 - **No runtime dependency**: Single binary, fits naturally in a Go project.
-- **YAML configuration**: Consistent with Task's config format.
+- **YAML configuration**: Declarative, version-controlled hook definitions.
 - **`piped` execution**: Hooks run sequentially, failing fast on first error.
 - **`stage_fixed: true`**: Auto-stages formatter fixes.
 - **`glob` filtering**: Hooks only run when relevant files change.
@@ -28,6 +28,6 @@ Reasons:
 
 ## Consequences
 
-- `lefthook` must be available on PATH. `lefthook install` is enforced via `task check`.
+- `lefthook` is pinned in `mise.toml`. `lefthook install` is enforced via `mise run check`.
 - Hook configuration lives in `lefthook.yml` at the repository root.
-- All hook commands delegate to Task.
+- Hook commands delegate to mise tasks (`mise run`), or run mise-pinned tools directly with `mise exec` when no task wraps them.

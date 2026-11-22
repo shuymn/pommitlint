@@ -16,38 +16,48 @@ pre-commit:
     fmt:
       tags: [format]
       glob: "**/*.go"
-      run: task fmt:fix -- {staged_files}
+      run: mise run fmt:fix {staged_files}
       stage_fixed: true
 
     fmt:ts:
       tags: [format]
       glob: "tools/**/*.ts"
-      run: task fmt:fix:ts
+      run: mise run fmt:fix:ts
       stage_fixed: true
 
     lint:
       tags: [lint]
       glob: "**/*.go"
-      run: task lint
+      run: mise run lint
 
     lint:ts:
       tags: [lint]
       glob: "tools/**/*.ts"
-      run: task lint:ts
+      run: mise run lint:ts
 
     tidy:
       tags: [deps]
       glob: "go.mod,go.sum"
-      run: task tidy
+      run: mise run tidy
 
     build:
       tags: [build]
       glob: "**/*.go"
-      run: task build
+      run: mise run build
 
-    gitleaks:
+    actionlint:
+      tags: [lint]
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: mise exec -- actionlint
+
+    ghalint:
+      tags: [lint]
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: mise exec -- ghalint run
+
+    betterleaks:
       tags: [security]
-      run: task secrets:staged
+      run: mise run secrets:staged
 
   skip:
     - merge: true
@@ -56,11 +66,11 @@ pre-commit:
 commit-msg:
   commands:
     pommitlint:
-      run: task lint:commit-msg -- {1}
+      run: mise run lint:commit-msg {1}
 
 pre-push:
   piped: true
   commands:
     checks:
       tags: [build, test, deps]
-      run: task check:full
+      run: mise run check:full

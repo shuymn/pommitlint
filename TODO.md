@@ -4,11 +4,11 @@
   - Must Not Break: runtime への Node/Bun/npm 依存持ち込み、unknown rule / parser field の黙殺、resolved config の丸ごと dump。
   - Non-goals: arbitrary `extends`、任意 `parserPreset`、JS/TS config 実行、plugin system、formatter/prompt 取り込み。
   - Acceptance (EARS):
-    - When maintainer runs `task sync-preset`, the repository shall regenerate a normalized `internal/preset/preset.json` from `@commitlint/config-conventional` and its resolved parser preset only.
+    - When maintainer runs `mise run sync-preset`, the repository shall regenerate a normalized `internal/preset/preset.json` from `@commitlint/config-conventional` and its resolved parser preset only.
     - If sync observes an unknown rule, unsupported parser field, or non-normalizable function value, the sync command shall fail without writing a partially accepted artifact.
-  - Evidence: `run=task sync-preset && git diff --exit-code -- internal/preset tools/sync-preset; oracle=sync succeeds with only normalized artifact changes and fails closed on unsupported upstream fields; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./tools/sync-preset/... -run 'TestSyncPreset|TestNormalizePreset'; notes=snapshot/no-diff validation is the canonical closure evidence for preset sync.`
+  - Evidence: `run=mise run sync-preset && git diff --exit-code -- internal/preset tools/sync-preset; oracle=sync succeeds with only normalized artifact changes and fails closed on unsupported upstream fields; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./tools/sync-preset/... -run 'TestSyncPreset|TestNormalizePreset'; notes=snapshot/no-diff validation is the canonical closure evidence for preset sync.`
   - Gates: `static`, `integration`
-  - Executable doc: `task sync-preset` regenerates normalized preset artifacts and a repeat run produces no diff.
+  - Executable doc: `mise run sync-preset` regenerates normalized preset artifacts and a repeat run produces no diff.
   - Why not split vertically further?: parser/rules/runtime の全 Theme がこの artifact contract に依存するため、先に閉じないと後続の public contract が揺れる。
   - Escalate if: upstream resolved config に schema 化不能な値が含まれ、fail-closed 以外で前進できないと判明した場合。
 
@@ -23,7 +23,7 @@
     - If a body line contains a URL, `body-max-line-length` shall ignore that line, and `footer-max-line-length` shall not inherit that exception.
     - If a subject is non-Latin only, `subject-case` shall not fail unless the subject clearly matches a forbidden case bucket.
     - When linting a typical single commit message, the command shall complete without network access, without spawning external parsers, and with work proportional to input length.
-  - Evidence: `run=task check && go test ./... -run 'TestLint|TestParser|TestReport'; oracle=fixtures and contract tests prove lint output, JSON shape, and exit codes across valid/invalid messages; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay|TestCLIFileReplay'; notes=system-level fixture replay is the primary closure check for the runtime contract.`
+  - Evidence: `run=mise run check && go test ./... -run 'TestLint|TestParser|TestReport'; oracle=fixtures and contract tests prove lint output, JSON shape, and exit codes across valid/invalid messages; visibility=implementation-visible; controls=[agent,context]; missing=[]; companion=go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay|TestCLIFileReplay'; notes=system-level fixture replay is the primary closure check for the runtime contract.`
   - Gates: `static`, `integration`, `system`
   - Executable doc: `go test ./... -run 'TestCLIStdinReplay|TestCLIMessageReplay|TestCLIEditReplay|TestCLIFileReplay'` proves text/json output and CLI exit codes for each input mode.
   - Why not split vertically further?: parser、rules、report を別 Theme にすると AST と finding schema の責務境界が二重定義になりやすい。
@@ -48,17 +48,17 @@
 
 - [x] Theme: verification / release metadata / docs を閉じる
   - Outcome: v1 を close できる checks、配布 metadata、利用者向け最低限 docs が揃う。
-  - Goal: `task` 導線、golden/fuzz tests、`THIRD_PARTY_NOTICES.md`、README、設計 artifact の整合性、非機能要件の replay を固定する。
-  - Must Not Break: `task check` の標準導線、ライセンス notice 欠落、未検証での merge 判定、セキュリティ/性能要件の未証明なままの close、embed 済み preset 由来物に対する attribution 不足。
+  - Goal: `mise run` 導線、golden/fuzz tests、`THIRD_PARTY_NOTICES.md`、README、設計 artifact の整合性、非機能要件の replay を固定する。
+  - Must Not Break: `mise run check` の標準導線、ライセンス notice 欠落、未検証での merge 判定、セキュリティ/性能要件の未証明なままの close、embed 済み preset 由来物に対する attribution 不足。
   - Non-goals: package manager 配布、CI/CD の拡張、自動 release pipeline、v2 scope の文書化。
   - Acceptance (EARS):
-    - When `task check` runs after implementation, it shall cover lint, build, test, and tidy without leaving repo-tracked diffs.
+    - When `mise run check` runs after implementation, it shall cover lint, build, test, and tidy without leaving repo-tracked diffs.
     - If preset sync is rerun without upstream changes, snapshot verification shall show no diff.
     - When shipping v1, the repository shall contain `LICENSE`, `THIRD_PARTY_NOTICES.md`, updated README, and the design artifacts needed to replay closure decisions.
     - When shipping an embedded preset artifact, `THIRD_PARTY_NOTICES.md` shall include attribution and license text for the upstream packages whose data is redistributed through that artifact.
     - When shipping v1, the repository shall include replayable evidence that lint runtime stays offline, bounded by input size, and does not execute untrusted config or shell content from commit messages.
-  - Evidence: `run=task check && task sync-preset && git diff --exit-code && go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'; oracle=full verification passes, repeat sync/check leave the repo clean, and targeted non-functional tests prove offline/runtime-boundary behavior; visibility=independent; controls=[agent,context]; missing=[]; companion=none; notes=repo-clean after check/sync plus targeted non-functional replay is the final release-readiness gate.`
+  - Evidence: `run=mise run check && mise run sync-preset && git diff --exit-code && go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'; oracle=full verification passes, repeat sync/check leave the repo clean, and targeted non-functional tests prove offline/runtime-boundary behavior; visibility=independent; controls=[agent,context]; missing=[]; companion=none; notes=repo-clean after check/sync plus targeted non-functional replay is the final release-readiness gate.`
   - Gates: `static`, `integration`, `system`
-  - Executable doc: `task check`, repeat `task sync-preset`, and `go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'` complete successfully with no repo-tracked diff.
+  - Executable doc: `mise run check`, repeat `mise run sync-preset`, and `go test ./... -run 'TestNoNetworkLint|TestNoShellInterpolation|TestBoundedInputBehavior'` complete successfully with no repo-tracked diff.
   - Why not split vertically further?: release metadata と closure docs は merge 判定に直結するため、最後の close 条件として 1 Theme に束ねる。
   - Escalate if: upstream attribution や shipped artifact の法的要件が現在の notice 方針を超える場合、または embed artifact のライセンス範囲が単純な notice 同梱では解釈できない場合。

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-011](011-mise-for-tools-and-tasks.md)
 
 ## Context
 

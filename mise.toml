@@ -1,0 +1,172 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+# Development tools and tasks. Run `mise tasks` to list the tasks.
+min_version = "2026.10.3"
+
+[settings]
+lockfile_platforms = ["macos-arm64", "linux-x64"]
+minimum_release_age = "1d"
+npm.package_manager = "bun"
+
+[tool_config]
+locked = true
+
+# Project-local caches (docs/adr/004-local-tool-cache.md).
+[env]
+GOMODCACHE = "{{config_root}}/.cache/go-mod"
+GOCACHE = "{{config_root}}/.cache/go-build"
+GOLANGCI_LINT_CACHE = "{{config_root}}/.cache/golangci-lint"
+# Use the Go that mise.lock pins, not a toolchain go.mod selects.
+GOTOOLCHAIN = "local"
+
+# Each tool tracks its major version; mise.lock pins the exact versions and
+# .github/workflows/mise-update.yml advances it.
+[tools]
+go = "1"
+golangci-lint = "2"
+bun = "1"
+# oxfmt is an npm package (installed with Bun) whose launcher runs on Node.
+node = "24"
+oxlint = "1"
+oxfmt = "0"
+lefthook = "2"
+actionlint = "1"
+betterleaks = "1"
+"github:suzuki-shunsuke/ghalint" = "1"
+"github:babarot/gh-infra" = "0"
+
+[tasks."infra:validate"]
+description = "Validate the declarative GitHub repository settings"
+run = "gh-infra validate .github/infra.yaml"
+
+[tasks."infra:plan"]
+description = "Compare declared GitHub settings with live state (read-only)"
+run = "gh-infra plan .github/infra.yaml"
+
+# Mutates shuymn/pommitlint settings and needs gh authentication with repository
+# administration access. Run infra:plan first; for an already-approved
+# noninteractive apply, pass --auto-approve.
+[tasks."infra:apply"]
+description = "Apply declared GitHub settings after reviewing the plan (requires explicit authorization)"
+raw = true
+run = "gh-infra apply .github/infra.yaml"
+
+[tasks.build]
+description = "Build the main binary into bin/pommitlint"
+run = [
+  "mkdir -p bin",
+  'go build -ldflags "-X github.com/shuymn/pommitlint/internal/version.Version=dev" -o bin/pommitlint .',
+  "test -f bin/pommitlint",
+  "test -x bin/pommitlint",
+]
+
+[tasks."build:check"]
+description = "Compile-check all packages"
+run = "go build -o /dev/null ./..."
+
+[tasks.clean]
+description = "Remove build artifacts and coverage files"
+run = ["rm -f bin/pommitlint coverage.out", "go clean"]
+
+[tasks.run]
+description = "Build and run the main binary"
+depends = ["build"]
+run = "./bin/pommitlint"
+
+[tasks.compat-check]
+description = "Run differential compatibility check against commitlint"
+run = [
+  "cd tools/compat-check && bun install --frozen-lockfile",
+  "go test -v -count=1 -timeout=60s -tags=compat ./tools/compat-check",
+]
+
+[tasks.sync-preset]
+description = "Regenerate the normalized embedded preset artifact (internal/preset/preset.json)"
+run = [
+  "cd tools/sync-preset && bun install --frozen-lockfile",
+  "go run ./tools/sync-preset",
+]
+
+[tasks.test]
+description = "Run tests with race detection, shuffle, and 10x count"
+run = "go test -race -shuffle=on -count=10 ./..."
+
+[tasks."test:release"]
+description = "Test release eligibility and publication guards without GitHub writes"
+run = [
+  "bash tools/release/auto-patch_test.sh",
+  "bash tools/release/check-publish_test.sh",
+]
+
+[tasks."test:coverage"]
+description = "Run tests with coverage output (coverage.out) and octocov ls-files"
+tools = { "github:k1LoW/octocov" = "0" }
+run = [
+  "go test -race -coverprofile=coverage.out ./...",
+  "octocov ls-files",
+]
+
+[tasks."install:lefthook"]
+description = "Install lefthook git hooks if needed"
+hide = true
+quiet = true
+run = "lefthook check-install || lefthook install"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = ["golangci-lint config verify", "golangci-lint run"]
+
+[tasks."lint:ts"]
+description = "Run oxlint on TypeScript files in tools/"
+run = "oxlint tools/"
+
+[tasks."fmt:check"]
+description = "Check Go formatting without modifying files; optional paths after the task name"
+run = "golangci-lint fmt --diff"
+
+[tasks."fmt:check:ts"]
+description = "Check TypeScript formatting in tools/ without modifying files"
+run = "oxfmt --check tools/"
+
+[tasks."fmt:fix"]
+description = "Format Go code; optional paths after the task name"
+alias = "fmt"
+run = "golangci-lint fmt"
+
+[tasks."fmt:fix:ts"]
+description = "Format TypeScript files in tools/"
+alias = "fmt:ts"
+run = "oxfmt tools/"
+
+[tasks."lint:commit-msg"]
+description = "Lint a commit message file with the locally built pommitlint: mise run lint:commit-msg <path>"
+run = [
+  'test -x bin/pommitlint || { echo "bin/pommitlint is not built. Run: mise run build" >&2; exit 1; }',
+  "./bin/pommitlint lint --edit",
+]
+
+[tasks."secrets:staged"]
+description = "Scan staged changes for secrets"
+run = "betterleaks git --pre-commit --staged --redact --no-banner --verbose"
+
+[tasks.tidy]
+description = "Normalize and verify Go module state (may modify go.mod and go.sum)"
+run = ["go mod tidy -v", "go mod verify"]
+
+[tasks."check:fast"]
+description = "Run lint and compile checks"
+depends = ["install:lefthook"]
+run = [{ task = "lint" }, { task = "build:check" }]
+
+[tasks."check:full"]
+description = "Run lint, compile checks, tests, release tests, and module hygiene checks"
+alias = "check"
+depends = ["install:lefthook"]
+run = [
+  { task = "lint" },
+  { task = "lint:ts" },
+  { task = "fmt:check:ts" },
+  { task = "build:check" },
+  { task = "test" },
+  { task = "test:release" },
+  { task = "tidy" },
+]
