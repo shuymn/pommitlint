@@ -4,7 +4,7 @@ Use this file only when the task explicitly points to repository-specific test r
 
 ## Running Tests
 
-- Use `mise run test` for the full suite and `mise run check` for CI-equivalent verification.
+- Use `mise run test` for the full suite and `mise run check` for full local verification (CI additionally runs `sync-preset` drift and `compat-check`).
 - Run Go through mise (`mise run`, `mise exec`, or an activated mise shell) so `GOMODCACHE`, `GOCACHE`, and `GOLANGCI_LINT_CACHE` stay inside `.cache/`.
 - Use `go test -run TestName ./path/to/pkg` only for focused runs. Outside mise, preserve the same cache environment.
 

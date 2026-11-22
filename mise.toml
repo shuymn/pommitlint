@@ -24,6 +24,8 @@ GOTOOLCHAIN = "local"
 go = "1"
 golangci-lint = "2"
 bun = "1"
+# oxfmt is an npm package (installed with Bun) whose launcher runs on Node.
+node = "24"
 oxlint = "1"
 oxfmt = "0"
 lefthook = "2"
@@ -53,6 +55,7 @@ description = "Build the main binary into bin/pommitlint"
 run = [
   "mkdir -p bin",
   'go build -ldflags "-X github.com/shuymn/pommitlint/internal/version.Version=dev" -o bin/pommitlint .',
+  "test -f bin/pommitlint",
   "test -x bin/pommitlint",
 ]
 

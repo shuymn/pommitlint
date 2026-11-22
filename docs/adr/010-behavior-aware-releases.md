@@ -33,4 +33,4 @@ A conservative file comparison may request manual review for a behavior-preservi
 
 Manage rulesets authoritatively, but keep labels additive so gh-infra does not delete tagpr's dynamically created release-control labels. Import other repository settings without changing their values. Do not add an automatic infra-apply workflow or give the release App administration access. Run `mise run infra:plan` after apply and require no remaining changes; inspect `repos/shuymn/pommitlint/rules/branches/main` to verify the strict check and its provider. Reapply changes through the manifest rather than making UI-only edits.
 
-Run `mise run test:release`, `mise run check`, `mise run sync-preset` (require no preset diff), `mise run compat-check`, `actionlint`, and `ghalint run` when changing this pipeline.
+Run `mise run test:release`, `mise run check`, `mise run sync-preset` (require no preset diff), `mise run compat-check`, `mise exec -- actionlint`, and `mise exec -- ghalint run` when changing this pipeline.
