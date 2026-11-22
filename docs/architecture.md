@@ -11,7 +11,7 @@ Provide a Go CLI that enforces `@commitlint/config-conventional` equivalent lint
 - Upstream preset drift must be handled at build time, not runtime.
 - Runtime must fail closed when embedded preset/schema expectations are violated.
 - Runtime lint execution must remain offline and must not require external interpreters or parser subprocesses.
-- Repository-standard developer entrypoints remain `task`, `go test`, and Go-native verification.
+- Repository-standard developer entrypoints remain mise tasks (`mise run`), `go test`, and Go-native verification.
 
 ## Core Boundaries
 

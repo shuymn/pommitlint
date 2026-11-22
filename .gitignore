@@ -9,10 +9,7 @@
 # OS
 .DS_Store
 
-# Task runner cache
-/.task/
-
-# Local binaries (golangci-lint etc.)
+# Local binaries (built pommitlint)
 /bin/
 
 # Go cache (local for LLM access)

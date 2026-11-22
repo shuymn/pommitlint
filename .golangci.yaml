@@ -63,7 +63,7 @@ linters:
     exhaustive:
       check:
         - switch
-        - map
+        - mapliteral
       # Package-scope enums are where silent drift is most expensive; local enums
       # are usually easier to audit in-place during review.
       package-scope-only: true

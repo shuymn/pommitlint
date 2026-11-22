@@ -3,12 +3,13 @@
 
 ## Build, Test, and Development Commands
 
-- Use Task (Taskfile.yml) as the default interface; run `task` to list all tasks, `task --summary <name>` for details
-- `task test` — runs with race detection, shuffle, and 10x count
-- `task check` — lint + build + test; run after any code change
+- Use mise tasks (`mise.toml`) as the default interface; run `mise tasks` to list them, `mise tasks info <name>` for details
+- mise pins every tool (`mise.toml` major ranges, exact versions in `mise.lock`); `mise.lock` is updated by `.github/workflows/mise-update.yml`, not by Renovate
+- `mise run test` — runs with race detection, shuffle, and 10x count
+- `mise run check` — lint + build + test; run after any code change
 - Never edit `go.mod` or `go.sum` manually; use `go get`, `go mod tidy`, etc.
 - `go test -run TestName ./path/to/pkg` to run a single test
-- Prefer `task` to ensure project-local cache paths (`.cache/`) are used; see [ADR-004](docs/adr/004-local-tool-cache.md)
+- Prefer `mise run` / `mise exec` to ensure project-local cache paths (`.cache/`) are used; see [ADR-004](docs/adr/004-local-tool-cache.md)
 
 ## Git Conventions
 
@@ -17,7 +18,7 @@
 
 ## GitHub Repository Settings
 
-- Manage repository settings declaratively in `.github/infra.yaml` with gh-infra via the `infra:*` tasks.
+- Manage repository settings declaratively in `.github/infra.yaml` with gh-infra via the `infra:*` mise tasks.
 - Before changing rulesets or activating automatic releases, read [ADR-010](docs/adr/010-behavior-aware-releases.md) for rollout order and verification.
 
 ## Documentation Scope

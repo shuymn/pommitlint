@@ -27,20 +27,16 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
-      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          go-version-file: go.mod
-          cache: true
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+          version: 2026.11.10
 
       # Always regenerate from the current lockfile; an older sync commit is not
       # evidence that a refreshed Renovate branch still has the correct preset.
       - name: Run sync-preset
         id: sync
         run: |
-          (cd tools/sync-preset && bun install --frozen-lockfile)
-          go run ./tools/sync-preset
+          mise run sync-preset
           if ! git diff --quiet -- internal/preset/preset.json; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi

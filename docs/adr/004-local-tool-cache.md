@@ -10,13 +10,13 @@ Go tooling uses several caches (`GOMODCACHE`, `GOCACHE`, `GOLANGCI_LINT_CACHE`).
 
 ## Decision
 
-Override cache directories to project-local `.cache/` via Taskfile environment variables:
+Override cache directories to project-local `.cache/` via `[env]` in `mise.toml`:
 
-```yaml
-env:
-  GOMODCACHE: "{{.ROOT_DIR}}/.cache/go-mod"
-  GOCACHE: "{{.ROOT_DIR}}/.cache/go-build"
-  GOLANGCI_LINT_CACHE: "{{.ROOT_DIR}}/.cache/golangci-lint"
+```toml
+[env]
+GOMODCACHE = "{{config_root}}/.cache/go-mod"
+GOCACHE = "{{config_root}}/.cache/go-build"
+GOLANGCI_LINT_CACHE = "{{config_root}}/.cache/golangci-lint"
 ```
 
 Reasons:
@@ -29,4 +29,4 @@ Reasons:
 ## Consequences
 
 - `.cache/` is gitignored.
-- Cache isolation only applies when running via `task`. Direct `go` commands use global caches unless the env vars are set explicitly.
+- Cache isolation applies when running through mise (`mise run`, `mise exec`, or a shell with mise activated). Commands run without mise use global caches unless the env vars are set explicitly.

@@ -78,13 +78,14 @@ pommitlint enforces the following rules from `@commitlint/config-conventional`:
 
 ## Development
 
-Requires [Task](https://taskfile.dev/).
+Requires [mise](https://mise.jdx.dev/), which installs the pinned toolchain and runs the tasks.
 
 ```bash
-task build     # build the binary
-task test      # run tests with race detection
-task lint      # run linter
-task check     # lint + build + test
+mise install          # install Go, golangci-lint, Bun, and other tools
+mise run build        # build the binary
+mise run test         # run tests with race detection
+mise run lint         # run linter
+mise run check        # lint + build + test
 ```
 
 ## License
