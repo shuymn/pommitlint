@@ -3,7 +3,7 @@
 min_version = "2026.10.3"
 
 [settings]
-lockfile_platforms = ["macos-arm64", "linux-x64"]
+lockfile_platforms = ["macos-arm64", "linux-x64", "windows-x64"]
 minimum_release_age = "1d"
 npm.package_manager = "bun"
 
@@ -33,6 +33,8 @@ actionlint = "1"
 betterleaks = "1"
 "github:suzuki-shunsuke/ghalint" = "1"
 "github:babarot/gh-infra" = "0"
+# test:release reads workflow YAML with yq.
+yq = "4"
 
 [tasks."infra:validate"]
 description = "Validate the declarative GitHub repository settings"
@@ -52,6 +54,8 @@ run = "gh-infra apply .github/infra.yaml"
 
 [tasks.build]
 description = "Build the main binary into bin/pommitlint"
+# POSIX commands; on Windows, run them in Git for Windows' sh instead of cmd.exe.
+shell = "sh -o errexit -c"
 run = [
   "mkdir -p bin",
   'go build -ldflags "-X github.com/shuymn/pommitlint/internal/version.Version=dev" -o bin/pommitlint .',
@@ -61,10 +65,12 @@ run = [
 
 [tasks."build:check"]
 description = "Compile-check all packages"
-run = "go build -o /dev/null ./..."
+run = "go build ./..."
 
 [tasks.clean]
 description = "Remove build artifacts and coverage files"
+# POSIX commands; on Windows, run them in Git for Windows' sh instead of cmd.exe.
+shell = "sh -o errexit -c"
 run = ["rm -f bin/pommitlint coverage.out", "go clean"]
 
 [tasks.run]
@@ -89,6 +95,8 @@ run = [
 [tasks.test]
 description = "Run tests with race detection, shuffle, and 10x count"
 run = "go test -race -shuffle=on -count=10 ./..."
+# -race needs cgo and a C compiler, which Windows hosts lack; CI on Linux keeps race coverage.
+run_windows = "go test -shuffle=on -count=10 ./..."
 
 [tasks."test:release"]
 description = "Test release eligibility and publication guards without GitHub writes"
@@ -104,6 +112,7 @@ run = [
   "go test -race -coverprofile=coverage.out ./...",
   "octocov ls-files",
 ]
+run_windows = ["go test -coverprofile=coverage.out ./...", "octocov ls-files"]
 
 [tasks."install:lefthook"]
 description = "Install lefthook git hooks if needed"
@@ -139,6 +148,8 @@ run = "oxfmt tools/"
 
 [tasks."lint:commit-msg"]
 description = "Lint a commit message file with the locally built pommitlint: mise run lint:commit-msg <path>"
+# POSIX commands; on Windows, run them in Git for Windows' sh instead of cmd.exe.
+shell = "sh -o errexit -c"
 run = [
   'test -x bin/pommitlint || { echo "bin/pommitlint is not built. Run: mise run build" >&2; exit 1; }',
   "./bin/pommitlint lint --edit",
@@ -147,6 +158,11 @@ run = [
 [tasks."secrets:staged"]
 description = "Scan staged changes for secrets"
 run = "betterleaks git --pre-commit --staged --redact --no-banner --verbose"
+# betterleaks 1.10.1 isolates Git config with GIT_DIR=/dev/null, which Git for
+# Windows rejects ("error reading /dev/null"). Trusting the local config adds
+# nothing in a pre-commit hook, where Git already runs this repository's hooks.
+# Drop once betterleaks reads the config on Windows without it.
+run_windows = "betterleaks git --pre-commit --staged --redact --no-banner --verbose --trust-local-git-config"
 
 [tasks.tidy]
 description = "Normalize and verify Go module state (may modify go.mod and go.sum)"

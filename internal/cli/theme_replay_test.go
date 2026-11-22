@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -199,7 +200,8 @@ func TestHookInstall(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat hook file: %v", err)
 	}
-	if info.Mode().Perm() != 0o755 {
+	// Windows has no Unix permission bits; Git for Windows runs hooks without them.
+	if runtime.GOOS != "windows" && info.Mode().Perm() != 0o755 {
 		t.Fatalf("mode = %v, want 0755", info.Mode().Perm())
 	}
 }
