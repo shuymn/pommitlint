@@ -16,6 +16,7 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - arm64
@@ -27,6 +28,10 @@ archives:
   - id: default
     formats:
       - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
     name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE

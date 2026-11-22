@@ -45,7 +45,15 @@ jobs:
         if: steps.guard.outputs.publish == 'true'
         run: |
           go install "github.com/google/go-licenses/v2@${GO_LICENSES_VERSION:?}"
-          go-licenses save ./... --save_path=third_party_licenses --force
+          # Dependencies differ by target OS (cobra pulls in mousetrap on Windows),
+          # so collect the licenses for every GOOS that .goreleaser.yml builds.
+          rm -rf third_party_licenses
+          mkdir third_party_licenses
+          for goos in linux darwin windows; do
+            GOOS="$goos" go-licenses save ./... --save_path="$RUNNER_TEMP/licenses-$goos" --force
+            # go-licenses writes read-only files; -f replaces the ones an earlier GOOS saved.
+            cp -Rf "$RUNNER_TEMP/licenses-$goos/." third_party_licenses/
+          done
 
       - name: Run GoReleaser
         if: steps.guard.outputs.publish == 'true'
