@@ -10,6 +10,8 @@ brew install shuymn/tap/pommitlint
 go install github.com/shuymn/pommitlint@latest
 ```
 
+Prebuilt archives for Linux, macOS, and Windows are attached to each [GitHub release](https://github.com/shuymn/pommitlint/releases).
+
 ## Usage
 
 ### Lint a commit message
