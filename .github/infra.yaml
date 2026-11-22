@@ -118,8 +118,6 @@ spec:
       verified_allowed: false
       patterns_allowed:
       - gitleaks/gitleaks-action@*
-      - golangci/golangci-lint-action@*
-      - oven-sh/setup-bun@*
       - goreleaser/goreleaser-action@*
       - jdx/mise-action@*
       - Songmu/tagpr@*
