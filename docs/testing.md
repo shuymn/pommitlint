@@ -10,7 +10,7 @@ Use this file only when the task explicitly points to repository-specific test r
 
 ## Suite Requirements
 
-- The full suite must pass with `-race -shuffle=on -count=10`.
+- The full suite must pass with `-race -shuffle=on -count=10`. On Windows, `mise run test` drops `-race` (it needs cgo and a C compiler); CI on Linux keeps the race run.
 - Tests must be race-free, order-independent, and stable across repeats.
 - Call `t.Parallel()` in tests and subtests by default. Skip it only when a shared side effect cannot be isolated.
 - Never call `t.Fatal` or `t.FailNow` from a helper goroutine.

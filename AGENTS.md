@@ -5,7 +5,7 @@
 
 - Use mise tasks (`mise.toml`) as the default interface; run `mise tasks` to list them, `mise tasks info <name>` for details
 - mise pins the development tools (`mise.toml` major ranges, exact versions in `mise.lock`); `mise.lock` is updated by `.github/workflows/mise-update.yml`, not by Renovate
-- `mise run test` — runs with race detection, shuffle, and 10x count
+- `mise run test` — runs with race detection (except on Windows), shuffle, and 10x count
 - `mise run check` — lint + build + test; run after any code change
 - Never edit `go.mod` or `go.sum` manually; use `go get`, `go mod tidy`, etc.
 - `go test -run TestName ./path/to/pkg` to run a single test

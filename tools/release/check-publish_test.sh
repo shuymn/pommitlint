@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "$0")/../.." && pwd)
+# pwd -P yields /c/... on Git Bash; a logical C:/... path would split PATH at the colon.
+root=$(cd "$(dirname "$0")/../.." && pwd -P)
 mkdir -p "$root/.cache"
 tmp=$(mktemp -d "$root/.cache/check-publish.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT

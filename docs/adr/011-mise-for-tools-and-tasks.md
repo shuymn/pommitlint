@@ -14,9 +14,10 @@ Use mise for both tool versions and tasks.
 
 - `mise.toml` declares tools by major version, project-local cache paths in `[env]` ([ADR-004](004-local-tool-cache.md)), and the tasks (same names as the former Taskfile tasks).
 - `GOTOOLCHAIN=local` makes every run use the Go that `mise.lock` pins instead of a toolchain that `go.mod` selects.
-- `mise.lock` pins exact versions for `macos-arm64` and `linux-x64` (with artifact checksums for binary backends; the npm-backed oxfmt records its version only), enforced by `locked = true`.
+- `mise.lock` pins exact versions for `macos-arm64`, `linux-x64`, and `windows-x64` (with artifact checksums for binary backends; the npm-backed oxfmt records its version only), enforced by `locked = true`.
 - `.github/workflows/mise-update.yml` bumps the lockfile daily through a pull request; Renovate's mise manager is disabled.
 - CI jobs and Lefthook call `mise run` (or `mise exec`), so local runs, hooks, and the CI workflow use the same tool versions. The shared reusable workflows (`gha.yml`, `security.yml` from `shuymn/github-actions`) keep their own scanner pins, as in the owner's other repositories.
+- Windows runs tasks through mise's default `cmd /c`, and mise ignores a project-level `windows_default_inline_shell_args`; tasks with POSIX commands (`mkdir -p`, `rm -f`, `test`, `./bin/...`) set `shell = "sh -o errexit -c"` (mise's Unix default, Git for Windows' `sh` on Windows). `test` and `test:coverage` drop `-race` on Windows through `run_windows`.
 - Tasks keep the former Taskfile names. `default` (use `mise tasks`) and `install:golangci-lint` (mise installs it) were dropped.
 
 Reasons:
