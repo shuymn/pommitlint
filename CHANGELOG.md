@@ -1,5 +1,18 @@
 # Changelog
 
+## [v2.0.5](https://github.com/shuymn/pommitlint/compare/v2.0.4...v2.0.5) - 2026-11-22
+
+- chore(deps): update go toolchain directive to v1.27.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/99
+- chore(deps): update songmu/tagpr action to v1.21.4 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/101
+- chore(deps): update songmu/tagpr action to v1.22.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/102
+- chore(deps): update go toolchain directive to v1.27.4 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/103
+- chore(deps): update actions/setup-go action to v7.1.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/104
+- chore(deps): update actions/create-github-app-token action to v3.4.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/105
+- Migrate the task runner from Task to mise by @shuymn in https://github.com/shuymn/pommitlint/pull/106
+- Drop actions replaced by mise from the allowlist by @shuymn in https://github.com/shuymn/pommitlint/pull/107
+- build: support development on windows by @shuymn in https://github.com/shuymn/pommitlint/pull/108
+- build: publish windows release archives by @shuymn in https://github.com/shuymn/pommitlint/pull/109
+
 ## [v2.0.4](https://github.com/shuymn/pommitlint/compare/v2.0.3...v2.0.4) - 2026-10-21
 
 - chore(deps): update goreleaser/goreleaser-action action to v7.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/93
