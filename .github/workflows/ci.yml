@@ -27,7 +27,7 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
 
       - name: Check Go module files
         run: |
@@ -56,7 +56,7 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
 
       - name: Run tests
         run: |
@@ -80,7 +80,7 @@ jobs:
       - name: Set up mise
         uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
 
       - name: Build binary
         run: mise run build
@@ -97,7 +97,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
         with:
-          version: 2026.11.10
+          version: 2026.11.11
       - name: Verify the embedded preset and compatibility target
         run: |
           mise run sync-preset
