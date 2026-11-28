@@ -1,5 +1,16 @@
 # Changelog
 
+## [v2.0.6](https://github.com/shuymn/pommitlint/compare/v2.0.5...v2.0.6) - 2026-11-28
+
+- chore(deps): update dependency jdx/mise to v2026.11.11 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/110
+- Update mise tools by @pommitlint-maintainer[bot] in https://github.com/shuymn/pommitlint/pull/112
+- chore(deps): update dependency jdx/mise to v2026.11.12 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/113
+- chore(deps): update jdx/mise-action action to v5.3.0 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/114
+- Update mise tools by @pommitlint-maintainer[bot] in https://github.com/shuymn/pommitlint/pull/115
+- chore(deps): update dependency jdx/mise to v2026.11.13 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/116
+- Update mise tools by @pommitlint-maintainer[bot] in https://github.com/shuymn/pommitlint/pull/117
+- chore(deps): update dependency jdx/mise to v2026.11.14 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/118
+
 ## [v2.0.5](https://github.com/shuymn/pommitlint/compare/v2.0.4...v2.0.5) - 2026-11-22
 
 - chore(deps): update go toolchain directive to v1.27.3 by @renovate[bot] in https://github.com/shuymn/pommitlint/pull/99
